@@ -226,8 +226,8 @@
 </head>
 <body>
 
-<!-- One-time tap overlay to unlock unmuted autoplay -->
-<div id="startOverlay">
+<!-- One-time tap overlay to unlock unmuted autoplay — hidden by default, shown only if video URL exists in sheet -->
+<div id="startOverlay" style="display:none;">
   <div class="so-icon">▶</div>
   <div class="so-text">Tap to Start Display</div>
   <div class="so-sub">Required once to enable audio</div>
@@ -440,15 +440,15 @@ async function loadSettings() {
         el.style.display = "block";
       }
       if (rVideo) {
-        pendingVideoUrl = toYouTubeEmbed(rVideo);
-        // If overlay already dismissed (user tapped before settings loaded), set src now
-        const overlay = document.getElementById("startOverlay");
-        if (overlay.style.display === "none") {
-          const iframe = document.getElementById("rightVideo");
-          iframe.src           = pendingVideoUrl;
-          iframe.style.display = "block";
+        const embedUrl = toYouTubeEmbed(rVideo);
+        if (gestureUnlocked) {
+          // Gesture already given (shouldn't happen on first load, but safe)
+          loadVideo(embedUrl);
+        } else {
+          // Show overlay and wait for tap
+          pendingVideoUrl = embedUrl;
+          document.getElementById("startOverlay").style.display = "flex";
         }
-        // Otherwise the overlay click handler will set it after tap
       }
     }
 
@@ -555,24 +555,66 @@ function resetAndFetch() {
   refreshTimer = setInterval(() => { countdown = 20; fetchNowServing(); }, 20000);
 }
 
-// ── CLICK-TO-START OVERLAY ─────────────────────────────────────
-// Browsers require a user gesture before allowing unmuted autoplay.
-// We show a fullscreen overlay on first load; tapping it provides
-// the gesture, dismisses the overlay, then sets the video src so
-// it starts playing unmuted from the very first frame.
-let pendingVideoUrl = "";   // stores embed URL until user taps
+// ── GESTURE UNLOCK + OVERLAY ───────────────────────────────────
+// gestureUnlocked = true after user taps overlay once.
+// Overlay is hidden by default — only shown when a video URL exists.
+let pendingVideoUrl = "";
+let currentVideoUrl = "";   // tracks what is currently loaded
+let gestureUnlocked = false;
 
 document.getElementById("startOverlay").addEventListener("click", () => {
+  gestureUnlocked = true;
   document.getElementById("startOverlay").style.display = "none";
-  // Now that we have a gesture, set the iframe src if a video is waiting
   if (pendingVideoUrl) {
-    const iframe = document.getElementById("rightVideo");
-    iframe.src           = pendingVideoUrl;
-    iframe.style.display = "block";
+    loadVideo(pendingVideoUrl);
+    pendingVideoUrl = "";
   }
 });
 
+function loadVideo(embedUrl) {
+  const iframe = document.getElementById("rightVideo");
+  iframe.src           = embedUrl;
+  iframe.style.display = "block";
+  currentVideoUrl      = embedUrl;
+}
+
+// ── VIDEO POLLING (every 30s) ──────────────────────────────────
+// Re-fetches settings silently. If the video URL in TVRightScreen
+// has changed, the new video starts automatically — no page refresh.
+async function pollVideoSettings() {
+  try {
+    const r    = await fetch(SCRIPT_URL + "?action=getSettings&_t=" + Date.now());
+    const data = await r.json();
+    const rRow     = data.find(r => r[0] === "TVRightScreen");
+    const rVideo   = rRow ? String(rRow[4] || "").trim() : "";
+    const embedUrl = rVideo ? toYouTubeEmbed(rVideo) : "";
+
+    if (embedUrl === currentVideoUrl) return; // nothing changed
+
+    if (!embedUrl) {
+      // Video was cleared from sheet — hide iframe
+      const iframe = document.getElementById("rightVideo");
+      iframe.src = ""; iframe.style.display = "none";
+      currentVideoUrl = "";
+      return;
+    }
+
+    // New or changed video
+    if (gestureUnlocked) {
+      loadVideo(embedUrl);
+    } else {
+      // Need gesture first — show overlay
+      pendingVideoUrl = embedUrl;
+      document.getElementById("startOverlay").style.display = "flex";
+      document.getElementById("rightPanel").style.display   = "flex";
+      document.getElementById("leftPanel").classList.remove("full");
+    }
+  } catch(e) { /* silent */ }
+}
+
+// ── BOOT ──────────────────────────────────────────────────────
 loadSettings();
+setInterval(pollVideoSettings, 30000); // check for video changes every 30s
 </script>
 </body>
 </html>
