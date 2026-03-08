@@ -440,10 +440,15 @@ async function loadSettings() {
         el.style.display = "block";
       }
       if (rVideo) {
-        // Don't set src yet — wait for user gesture on the overlay.
-        // The overlay click handler will set it after the tap.
         pendingVideoUrl = toYouTubeEmbed(rVideo);
-        // iframe stays hidden until overlay is dismissed
+        // If overlay already dismissed (user tapped before settings loaded), set src now
+        const overlay = document.getElementById("startOverlay");
+        if (overlay.style.display === "none") {
+          const iframe = document.getElementById("rightVideo");
+          iframe.src           = pendingVideoUrl;
+          iframe.style.display = "block";
+        }
+        // Otherwise the overlay click handler will set it after tap
       }
     }
 
