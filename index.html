@@ -1,673 +1,282 @@
 <!DOCTYPE html>
 <html>
 <head>
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Smile Dental Hospital</title>
-<script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>NKT Data Manager</title>
+
 <style>
-/* ── PRELOADER ─────────────────────────────────────────────── */
-#preloader{
-  position:fixed;top:0;left:0;width:100%;height:100%;
-  background:#f4f6f9;z-index:9999;
-  display:flex;justify-content:center;align-items:center;text-align:center;
-}
-#preloader p{
-  max-width:420px;margin:auto;font-size:18px;font-weight:700;
-  color:#007bff;line-height:1.6;
+:root {
+  --primary: #1a9c5a;
+  --primary-light: #e7f5ee;
+  --border: #d9d9d9;
+  --bg: #f4f6f8;
+  --text: #222;
 }
 
-/* ── BASE ──────────────────────────────────────────────────── */
-body{font-family:Segoe UI,sans-serif;margin:0;background:#f4f6f9;}
-.header{
-  background:#007bff;color:white;padding:18px;
-  text-align:center;font-size:22px;font-weight:600;
-  cursor:pointer;user-select:none;
-}
-.header span{display:block;font-size:14px;font-weight:400;margin-top:3px;}
-.container{padding:20px;max-width:600px;margin:auto;}
-.card{background:white;padding:25px;border-radius:12px;box-shadow:0 6px 18px rgba(0,0,0,0.08);}
-
-/* ── NOW SERVING CARD ──────────────────────────────────────── */
-/* Hidden by default — shown only when token is marked "in" today */
-#nowServingCard{
-  display:none;
-  background:white;border-radius:12px;
-  box-shadow:0 6px 18px rgba(0,0,0,0.08);
-  padding:20px 25px 18px;margin-bottom:18px;
+body {
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, Arial;
+  margin: 0;
+  padding: 12px;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background: var(--bg);
+  color: var(--text);
 }
 
-/* Green pulse dot */
-#liveDot{
-  display:inline-block;width:9px;height:9px;border-radius:50%;
-  background:#28a745;margin-right:7px;vertical-align:middle;
-  animation:pulse 1.8s ease-in-out infinite;
-}
-@keyframes pulse{
-  0%,100%{opacity:1;transform:scale(1);}
-  50%{opacity:.35;transform:scale(1.5);}
-}
-.ns-header{display:flex;align-items:center;margin-bottom:8px;}
-.ns-label{
-  font-size:11px;font-weight:700;letter-spacing:1.8px;
-  color:#888;text-transform:uppercase;
+/* ===============================
+   DROPDOWN
+   =============================== */
+select {
+  width: 100%;
+  padding: 10px;
+  margin-bottom: 8px;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  background: white;
+  font-size: 15px;
 }
 
-/* Token display */
-.ns-token{
-  font-size:42px;font-weight:900;color:#007bff;
-  line-height:1;letter-spacing:-1px;
+/* ===============================
+   ACTION BUTTONS
+   =============================== */
+.actions {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 8px;
 }
 
-/* Doctor · Clinic line */
-.ns-sub{font-size:13px;color:#888;margin-top:5px;}
-
-/* Refresh timestamp */
-.ns-refresh{display:block;font-size:11px;color:#ccc;margin-top:10px;}
-
-/* ── BOOKING FORM ───────────────────────────────────────────── */
-label{font-weight:600;display:block;margin-top:15px;}
-.doctorSection{display:flex;align-items:flex-start;gap:12px;margin-top:4px;}
-.doctorButtons{flex:1;display:flex;flex-wrap:wrap;gap:8px;align-content:flex-start;}
-.doctorButtons button{
-  width:150px;height:56px;border:1px solid #007bff;background:white;
-  border-radius:8px;cursor:pointer;display:flex;flex-direction:column;
-  justify-content:center;align-items:center;text-align:center;
-  font-size:12px;line-height:1.3;padding:4px 8px;
-  white-space:nowrap;overflow:hidden;
-}
-.doctorButtons button span{font-size:11px;}
-.doctorButtons button.selected{background:#007bff;color:white;}
-#doctorImage{width:100px;height:130px;object-fit:cover;border-radius:6px;display:none;}
-
-.clinicButtons{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px;}
-.clinicButtons button{
-  border:1px solid #007bff;background:white;border-radius:6px;
-  padding:8px 12px;font-size:13px;cursor:pointer;
-}
-.clinicButtons button.selected{background:#007bff;color:white;}
-
-input,select{
-  width:100%;padding:12px;margin-top:6px;border-radius:8px;
-  border:1px solid #ddd;font-size:15px;box-sizing:border-box;
-}
-input.err{border-color:#dc3545;}
-.phone-hint{font-size:12px;color:#888;margin-top:3px;}
-.phone-hint.err{color:#dc3545;}
-
-.tokenInfo{
-  margin-top:15px;font-weight:bold;text-align:center;
-  font-size:16px;padding:10px;border-radius:8px;
-}
-.tokenInfo.avail{color:#007bff;background:#e8f0fe;}
-.tokenInfo.full {color:#dc3545;background:#fdecea;}
-
-#bookBtn{
-  width:100%;padding:14px;margin-top:16px;border-radius:8px;
-  border:none;color:white;font-size:15px;font-weight:600;
-  background:#aaa;cursor:not-allowed;
-}
-#bookBtn.ready  {background:#28a745;cursor:pointer;}
-#bookBtn.chk    {background:#f0a500;}
-#bookBtn.dup    {background:#dc3545;}
-#bookBtn.noslot {background:#dc3545;}
-#bookBtn.booking{background:#f0a500;}
-#bookBtn.booked {background:#28a745;}
-
-#statusMsg{
-  margin-top:10px;text-align:center;font-size:14px;
-  font-weight:600;min-height:18px;padding:4px;
-}
-#statusMsg.success{color:#28a745;}
-#statusMsg.err    {color:#dc3545;}
-#statusMsg.warn   {color:#e67e22;}
-
-#downloadBtn{
-  display:none;width:100%;padding:11px;margin-top:8px;
-  border-radius:8px;border:2px solid #007bff;background:white;
-  color:#007bff;font-size:14px;font-weight:600;cursor:pointer;
-  box-sizing:border-box;
+.actions button {
+  flex: 1;
+  padding: 10px;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  background: white;
+  font-size: 14px;
 }
 
-.hiddenInput{
-  opacity:0;position:fixed;top:-9999px;left:-9999px;
-  height:1px;width:1px;pointer-events:none;
+.actions button:last-child {
+  background: var(--primary);
+  color: white;
+  border: none;
+}
+
+.actions button:disabled {
+  opacity: 0.5;
+}
+
+/* ===============================
+   TABLE CONTAINER
+   =============================== */
+.table-wrapper {
+  flex: 1;
+  overflow-y: auto;
+  background: white;
+  border-radius: 10px;
+  border: 1px solid var(--border);
+  padding: 4px;
+}
+
+/* ===============================
+   TABLE BEAUTY (LOCKED)
+   =============================== */
+table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 1pt;
+}
+
+td {
+  border: 1px solid var(--border);
+  padding: 12px;
+  min-width: 80px;
+  font-size: 14px;
+  background: #fff;
+  border-radius: 6px;
+}
+
+td:active {
+  background: var(--primary-light);
+}
+
+td input {
+  width: 100%;
+  border: none;
+  padding: 12px;
+  font-size: 14px;
+  outline: none;
+  background: transparent;
 }
 </style>
 </head>
+
 <body>
 
-<div id="preloader">
-  <p>
-    नित्यमध्मान तां तांस्तु व्याधिभिश्च विवर्जितः।<br>
-    रसैश्च दन्तमूलानां रूक्षैराचाम्य विक्रियाम्॥
-  </p>
+<select id="tabs"></select>
+
+<div class="actions">
+  <button onclick="addRow()">＋ Row</button>
+  <button onclick="addColumn()">＋ Column</button>
+  <button id="undoBtn" onclick="undo()" disabled>Undo</button>
 </div>
 
-<div class="header" id="headerBar">
-  Smile Dental Hospital
-  <span id="headerAddress"></span>
-</div>
-<input type="password" id="adminInput" class="hiddenInput" autocomplete="off">
-
-<div class="container">
-
-  <!-- ── NOW SERVING (hidden until "in" is found for today) ── -->
-  <div id="nowServingCard">
-    <div class="ns-header">
-      <span id="liveDot"></span>
-      <span class="ns-label">Now Serving</span>
-    </div>
-    <div class="ns-token" id="nsToken">—</div>
-    <div class="ns-sub"   id="nsSub"></div>
-    <span class="ns-refresh" id="nsRefresh"></span>
-  </div>
-
-  <!-- ── BOOKING FORM ─────────────────────────────────────── -->
-  <div class="card">
-
-    <label>Doctor</label>
-    <div class="doctorSection">
-      <div class="doctorButtons" id="doctorButtons"></div>
-      <img id="doctorImage" alt="Doctor">
-    </div>
-
-    <label>Clinic</label>
-    <div class="clinicButtons" id="clinicButtons"></div>
-
-    <label>Name</label>
-    <input id="userName" type="text" placeholder="Full Name">
-
-    <label>Phone</label>
-    <input id="userPhone" type="tel" placeholder="10-digit Mobile Number"
-           maxlength="10" inputmode="numeric">
-    <div class="phone-hint" id="phoneHint">Enter 10-digit number</div>
-
-    <label>Address</label>
-    <input id="userAddress" type="text" placeholder="Your Address">
-
-    <label>Date</label>
-    <select id="dateSelect"></select>
-
-    <div class="tokenInfo avail" id="tokenDiv">Token Available: —</div>
-
-    <button id="bookBtn" type="button" disabled>Book Appointment</button>
-    <div id="statusMsg"></div>
-    <button id="downloadBtn" type="button">⬇ Download Booking Receipt</button>
-
-  </div>
+<div class="table-wrapper">
+  <table id="grid"></table>
 </div>
 
 <script>
-// ── WEB APP URL ─────────────────────────────────────────────────
-const scriptURL = "https://script.google.com/macros/s/AKfycby6hVR6u3QCODIrQ8lRybb4AusvejbUxaLPLs4rt8LiQs1YJKVvQ4LqvlwKTBshH-VjOA/exec";
-// ────────────────────────────────────────────────────────────────
+// ─── SET YOUR GOOGLE SHEET URL HERE ───────────────────────────────────────────
+const FIXED_SHEET_URL = 'https://docs.google.com/spreadsheets/d/1DcYyjC64MkTSyXAZPv6Q7W00kMJy_tSR3k5Q--Km0Ks/edit?gid=0#gid=0';
+// ──────────────────────────────────────────────────────────────────────────────
 
-let settingsData          = [];
-let selectedDoctor        = "";
-let selectedClinic        = "";
-let selectedClinicAddress = "";
-let adminPassword         = "";
-let slotLimits            = {};
-let doctorBlockedDays     = {}; // key: doctor name → Set of blocked weekday names (lowercase)
-let clinicBlockedDays     = {}; // key: clinic name  → Set of blocked weekday names (lowercase)
-let bookingState          = "idle";
-let checkTimer            = null;
-let nsTimer               = null;
-let slotsAvailable        = true;
-let lastBooking           = null;
+const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbylUR2ixBi9jQo8gvsVZME6fpxoHZ6Vrbt9O6IAh3XpxWpKxzeGbuFfvBQDbkskkD6q/exec';
 
-const $doctor   = document.getElementById("doctorButtons");
-const $clinic   = document.getElementById("clinicButtons");
-const $img      = document.getElementById("doctorImage");
-const $name     = document.getElementById("userName");
-const $phone    = document.getElementById("userPhone");
-const $address  = document.getElementById("userAddress");
-const $date     = document.getElementById("dateSelect");
-const $token    = document.getElementById("tokenDiv");
-const $btn      = document.getElementById("bookBtn");
-const $hdr      = document.getElementById("headerAddress");
-const $adm      = document.getElementById("adminInput");
-const $status   = document.getElementById("statusMsg");
-const $hint     = document.getElementById("phoneHint");
-const $dlBtn    = document.getElementById("downloadBtn");
-const $nsCard   = document.getElementById("nowServingCard");
-const $nsToken  = document.getElementById("nsToken");
-const $nsSub    = document.getElementById("nsSub");
-const $nsRef    = document.getElementById("nsRefresh");
+const tabs = document.getElementById('tabs');
+const grid = document.getElementById('grid');
+const undoBtn = document.getElementById('undoBtn');
 
-// ── INIT ─────────────────────────────────────────────────────────
-window.addEventListener("load", () => {
-  setTimeout(() => { document.getElementById("preloader").style.display = "none"; }, 5000);
-  loadSettings();
-});
+let sheetId = '';
+let currentTab = '';
+let editing = false;
 
-async function loadSettings() {
-  try {
-    const r = await fetch(scriptURL + "?action=getSettings");
-    settingsData = await r.json();
-    settingsData.forEach(row => {
-      if (row[0] === "AdminPassword") adminPassword = String(row[1]);
-      if (row[0] === "SlotLimit")
-        slotLimits[row[1].trim() + "||" + row[2].trim()] = Number(row[3]) || 0;
-      if (row[0] === "Header" && row[1])
-        document.getElementById("headerBar").childNodes[0].textContent = String(row[1]).trim() + " ";
-      // Extra2 column (index 3) = comma-separated blocked weekdays e.g. "saturday,sunday"
-      if (row[0] === "Doctor" && row[3]) {
-        const days = String(row[3]).toLowerCase().split(",").map(d => d.trim()).filter(Boolean);
-        if (days.length) doctorBlockedDays[String(row[1]).trim()] = new Set(days);
-      }
-      if (row[0] === "Clinic" && row[3]) {
-        const days = String(row[3]).toLowerCase().split(",").map(d => d.trim()).filter(Boolean);
-        if (days.length) clinicBlockedDays[String(row[1]).trim()] = new Set(days);
-      }
+const undoStack = [];
+
+/* Helpers */
+function extractSheetId(url) {
+  const m = url.match(/\/d\/([a-zA-Z0-9-_]+)/);
+  return m ? m[1] : '';
+}
+
+/* Tabs */
+async function loadTabs(selectTab = null) {
+  const r = await fetch(`${SCRIPT_URL}?action=tabs&sheetId=${sheetId}`);
+  const data = await r.json();
+
+  tabs.innerHTML = '';
+  data.sheets.forEach(s => tabs.add(new Option(s, s)));
+  tabs.add(new Option('+ Add new page', '__add__'));
+
+  if (selectTab) tabs.value = selectTab;
+  loadData();
+}
+
+/* Data */
+async function loadData() {
+  if (tabs.value === '__add__') {
+    const r = await fetch(SCRIPT_URL, {
+      method: 'POST',
+      body: JSON.stringify({ action: 'addSheet', sheetId })
     });
-    setupDates();
-    setupDoctors();
-    setupClinics();
-  } catch(e) {
-    setStatus("Failed to load settings. Please refresh.", "err");
-  }
-}
-
-// ── DATES ────────────────────────────────────────────────────────
-const WEEKDAYS = ["sunday","monday","tuesday","wednesday","thursday","friday","saturday"];
-
-function isDateBlocked(d) {
-  const dayName = WEEKDAYS[d.getDay()];
-  const docBlocked = doctorBlockedDays[selectedDoctor];
-  const clinBlocked = clinicBlockedDays[selectedClinic];
-  if (docBlocked  && docBlocked.has(dayName))  return true;
-  if (clinBlocked && clinBlocked.has(dayName)) return true;
-  return false;
-}
-
-function setupDates() {
-  $date.addEventListener("change", onSelChange);
-  buildDateOptions();
-}
-
-function buildDateOptions() {
-  // Remember current value so we can restore if still valid
-  const prev = $date.value;
-  $date.innerHTML = "";
-
-  // Offer today + next 6 days, skip blocked ones
-  let added = 0;
-  for (let i = 0; i <= 6 && added < 2; i++) {
-    const d = new Date();
-    d.setDate(d.getDate() + i);
-    if (isDateBlocked(d)) continue;
-    const o = document.createElement("option");
-    o.value = o.text = dateFmt(d);
-    $date.appendChild(o);
-    added++;
+    const res = await r.json();
+    return loadTabs(res.name);
   }
 
-  // If no dates available, show a placeholder
-  if ($date.options.length === 0) {
-    const o = document.createElement("option");
-    o.value = ""; o.text = "No dates available";
-    $date.appendChild(o);
+  currentTab = tabs.value;
+  const r = await fetch(`${SCRIPT_URL}?action=data&sheetId=${sheetId}&tab=${currentTab}`);
+  render((await r.json()).values);
+}
+
+/* Render */
+function render(values) {
+  grid.innerHTML = '';
+  values.forEach((r, ri) => {
+    const tr = document.createElement('tr');
+    r.forEach((c, ci) => {
+      const td = document.createElement('td');
+      td.textContent = c ?? '';
+      td.onclick = () => editCell(td, ri + 1, ci + 1);
+      tr.appendChild(td);
+    });
+    grid.appendChild(tr);
+  });
+}
+
+/* Inline edit */
+function editCell(td, row, col) {
+  if (editing) return;
+  editing = true;
+
+  const old = td.textContent;
+  td.innerHTML = `<input value="${old}">`;
+  const input = td.firstChild;
+
+  input.focus();
+  const len = input.value.length;
+  input.setSelectionRange(len, len);
+  input.scrollLeft = input.scrollWidth;
+
+  input.onblur = async () => {
+    const val = input.value;
+    td.textContent = val;
+    editing = false;
+
+    if (val !== old) {
+      undoStack.push({ tab: currentTab, row, col, value: old });
+      undoBtn.disabled = false;
+
+      await fetch(SCRIPT_URL, {
+        method: 'POST',
+        body: JSON.stringify({
+          action: 'updateCell',
+          sheetId,
+          tab: currentTab,
+          row,
+          col,
+          value: val
+        })
+      });
+    }
+  };
+}
+
+/* Undo */
+async function undo() {
+  if (!undoStack.length) return;
+
+  const last = undoStack.pop();
+  await fetch(SCRIPT_URL, {
+    method: 'POST',
+    body: JSON.stringify({
+      action: 'undoCell',
+      sheetId,
+      tab: last.tab,
+      row: last.row,
+      col: last.col,
+      value: last.value
+    })
+  });
+
+  undoBtn.disabled = !undoStack.length;
+  loadData();
+}
+
+/* Row / Column */
+function addRow() {
+  fetch(SCRIPT_URL, {
+    method: 'POST',
+    body: JSON.stringify({ action: 'addRow', sheetId, tab: currentTab })
+  }).then(loadData);
+}
+
+function addColumn() {
+  fetch(SCRIPT_URL, {
+    method: 'POST',
+    body: JSON.stringify({ action: 'addColumn', sheetId, tab: currentTab })
+  }).then(loadData);
+}
+
+/* Auto load on page open */
+window.onload = () => {
+  sheetId = extractSheetId(FIXED_SHEET_URL);
+  if (!sheetId) {
+    alert('Invalid FIXED_SHEET_URL — please update it in the script.');
     return;
   }
+  loadTabs();
+};
 
-  // Restore previous selection if still present
-  const opts = Array.from($date.options).map(o => o.value);
-  if (prev && opts.includes(prev)) $date.value = prev;
-}
-
-function dateFmt(d) {
-  return String(d.getDate()).padStart(2,"0") + "-" +
-         String(d.getMonth()+1).padStart(2,"0") + "-" + d.getFullYear();
-}
-
-// ── DOCTORS ──────────────────────────────────────────────────────
-function setupDoctors() {
-  settingsData.filter(r => r[0] === "Doctor").forEach((d, i) => {
-    const b = document.createElement("button");
-    b.type = "button";
-    b.innerHTML = d[1] + "<span>" + (d[4]||"") + "</span>";
-    b.addEventListener("click", () => {
-      selectedDoctor = d[1].trim();
-      $img.src = d[2] || ""; $img.style.display = d[2] ? "block" : "none";
-      Array.from($doctor.children).forEach(x => x.classList.remove("selected"));
-      b.classList.add("selected");
-      buildDateOptions(); // rebuild dates for new doctor's blocked days
-      onSelChange();
-    });
-    $doctor.appendChild(b);
-    if (i === 0) b.click();
-  });
-}
-
-// ── CLINICS ──────────────────────────────────────────────────────
-function setupClinics() {
-  settingsData.filter(r => r[0] === "Clinic").forEach((c, i) => {
-    const b = document.createElement("button");
-    b.type = "button";
-    b.innerText = c[1];
-    b.addEventListener("click", () => {
-      selectedClinic = c[1].trim();
-      selectedClinicAddress = (c[2] || "").trim();
-      $hdr.innerText = selectedClinicAddress;
-      Array.from($clinic.children).forEach(x => x.classList.remove("selected"));
-      b.classList.add("selected");
-      buildDateOptions(); // rebuild dates for new clinic's blocked days
-      onSelChange();
-    });
-    $clinic.appendChild(b);
-    if (i === 0) b.click();
-  });
-}
-
-// ── PHONE ────────────────────────────────────────────────────────
-$phone.addEventListener("keydown", e => {
-  const ok = ["Backspace","Delete","Tab","ArrowLeft","ArrowRight","Home","End"];
-  if (!ok.includes(e.key) && !/^\d$/.test(e.key)) e.preventDefault();
-});
-$phone.addEventListener("input", () => {
-  $phone.value = $phone.value.replace(/\D/g,"").slice(0,10);
-  const len = $phone.value.length;
-  if (len === 0) {
-    $hint.textContent = "Enter 10-digit number"; $hint.className = "phone-hint"; $phone.classList.remove("err");
-  } else if (len < 10) {
-    $hint.textContent = len + "/10 digits"; $hint.className = "phone-hint err"; $phone.classList.add("err");
-  } else {
-    $hint.textContent = "✓ Valid"; $hint.className = "phone-hint"; $phone.classList.remove("err");
-  }
-  onFormInput();
-});
-$name.addEventListener("input", onFormInput);
-$address.addEventListener("input", onFormInput);
-function phoneValid() { return /^\d{10}$/.test($phone.value); }
-
-// ── SELECTION CHANGE ─────────────────────────────────────────────
-function onSelChange() {
-  if (bookingState === "booking") return;
-  if (bookingState === "done") {
-    $token.style.display = ""; clearStatus(); $dlBtn.style.display = "none";
-  }
-  setState("idle"); clearStatus();
-  refreshNowServing();
-  refreshToken();
-  restartNsTimer();
-}
-
-// ── FORM INPUT ───────────────────────────────────────────────────
-function onFormInput() {
-  if (bookingState === "booking") return;
-  if (bookingState === "done") $token.style.display = "";
-  setState("idle");
-  scheduleCheck();
-}
-
-// ── CHECK DEBOUNCE ───────────────────────────────────────────────
-function scheduleCheck() {
-  clearTimeout(checkTimer);
-  checkTimer = setTimeout(runCheck, 400);
-}
-
-// ── DUPLICATE / SLOT CHECK ───────────────────────────────────────
-async function runCheck() {
-  if (bookingState === "booking" || bookingState === "done") return;
-  if (!slotsAvailable) { setState("full"); return; }
-
-  const name = $name.value.trim(), phone = $phone.value.trim(), address = $address.value.trim();
-  if (!name || !phoneValid() || !address) { setState("idle"); return; }
-
-  setState("checking");
-  try {
-    const r = await fetch(
-      scriptURL + "?action=checkDuplicate" +
-      "&name="   + encodeURIComponent(name) +
-      "&phone="  + encodeURIComponent(phone) +
-      "&clinic=" + encodeURIComponent(selectedClinic) +
-      "&date="   + encodeURIComponent($date.value)
-    );
-    const d = await r.json();
-    if (!slotsAvailable) { setState("full"); return; }
-    if (d.duplicate) {
-      setState("duplicate");
-      setStatus("An appointment already exists for this name & phone at this clinic on the selected date.", "warn");
-    } else {
-      setState("ready"); clearStatus();
-    }
-  } catch(e) {
-    setState("idle");
-    setStatus("Could not verify. Please wait and try again.", "warn");
-  }
-}
-
-// ── TOKEN REFRESH ─────────────────────────────────────────────────
-async function refreshToken() {
-  if (!selectedDoctor || !selectedClinic) return;
-  $token.textContent = "Checking availability…";
-  $token.className   = "tokenInfo avail";
-  $token.style.display = "";
-  try {
-    const r = await fetch(
-      scriptURL + "?action=getToken" +
-      "&doctor=" + encodeURIComponent(selectedDoctor) +
-      "&clinic=" + encodeURIComponent(selectedClinic) +
-      "&date="   + encodeURIComponent($date.value)
-    );
-    const d = await r.json();
-    const maxTok = Number(d.maxToken) || 0;
-    const limit  = slotLimits[selectedDoctor + "||" + selectedClinic] || 0;
-    if (limit > 0 && maxTok >= limit) {
-      slotsAvailable = false;
-      $token.textContent = "No Booking Available"; $token.className = "tokenInfo full";
-      setState("full");
-      setStatus("All slots are full for this doctor, clinic & date.", "err");
-    } else {
-      slotsAvailable = true;
-      $token.textContent = "Token Available: " + (maxTok + 1);
-      $token.className   = "tokenInfo avail";
-      if (bookingState === "full") { setState("idle"); clearStatus(); }
-    }
-  } catch(e) {
-    slotsAvailable = true; $token.textContent = "Token: —";
-  }
-  scheduleCheck();
-}
-
-// ── NOW SERVING ───────────────────────────────────────────────────
-// Shows the card ONLY when nowServing > 0 (i.e. "in" is marked today).
-// Hides card completely when nothing is marked "in".
-async function refreshNowServing() {
-  if (!selectedDoctor || !selectedClinic) return;
-  try {
-    const r = await fetch(
-      scriptURL + "?action=getNowServing" +
-      "&doctor=" + encodeURIComponent(selectedDoctor) +
-      "&clinic=" + encodeURIComponent(selectedClinic) +
-      "&date="   + encodeURIComponent($date.value)
-    );
-    const d  = await r.json();
-    const ns = Number(d.nowServing) || 0;
-
-    if (ns > 0) {
-      // Show the card
-      $nsCard.style.display  = "block";
-      $nsToken.textContent   = "Token: " + ns;
-      $nsSub.textContent     = "";
-    } else {
-      // No "in" marked today — hide the card entirely
-      $nsCard.style.display = "none";
-    }
-
-    // Refresh timestamp (shown when card is visible, harmless when hidden)
-    const t = new Date();
-    $nsRef.textContent = "Updated " +
-      t.toLocaleTimeString("en-IN", { hour:"2-digit", minute:"2-digit", second:"2-digit" });
-
-  } catch(e) {
-    // On error just hide the card — don't show broken state to patients
-    $nsCard.style.display = "none";
-  }
-}
-
-// Auto-refresh Now Serving every 20 seconds
-function restartNsTimer() {
-  clearInterval(nsTimer);
-  nsTimer = setInterval(refreshNowServing, 20000);
-}
-
-// ── BOOK ─────────────────────────────────────────────────────────
-$btn.addEventListener("click", async () => {
-  if (bookingState !== "ready") return;
-  setState("booking");
-  const params = new URLSearchParams();
-  params.append("name",    $name.value.trim());
-  params.append("phone",   $phone.value.trim());
-  params.append("doctor",  selectedDoctor);
-  params.append("clinic",  selectedClinic);
-  params.append("address", $address.value.trim());
-  params.append("date",    $date.value);
-  try {
-    const r = await fetch(scriptURL, { method: "POST", body: params });
-    const d = await r.json();
-    if (d.status === "success") {
-      lastBooking = {
-        hospital:"Smile Dental Hospital", clinic:selectedClinic,
-        clinicAddress:selectedClinicAddress, doctor:selectedDoctor,
-        name:$name.value.trim(), phone:$phone.value.trim(),
-        address:$address.value.trim(), date:$date.value,
-        token:d.token, timestamp:new Date().toLocaleString("en-IN")
-      };
-      setState("done");
-      $token.style.display = "none";
-      setStatus("✓ Appointment booked! Token: " + d.token, "success");
-      $dlBtn.style.display = "block";
-    } else if (d.status === "duplicate") {
-      setState("duplicate");
-      setStatus("Duplicate — already booked for this name & phone at this clinic on this date.", "warn");
-    } else if (d.status === "full") {
-      slotsAvailable = false;
-      $token.textContent = "No Booking Available"; $token.className = "tokenInfo full";
-      setState("full");
-      setStatus("All slots are full for this doctor, clinic & date.", "err");
-    } else {
-      setState("idle"); setStatus("Server error. Please try again.", "err");
-    }
-  } catch(e) {
-    setState("idle"); setStatus("Network error. Please check your connection.", "err");
-  }
-});
-
-// ── DOWNLOAD RECEIPT ──────────────────────────────────────────────
-$dlBtn.addEventListener("click", async () => { if (lastBooking) await buildReceipt(lastBooking); });
-
-async function buildReceipt(b) {
-  const SCALE=2, W=160, TH=10, PAD=8;
-  let qrDataURL = null;
-  try {
-    qrDataURL = await QRCode.toDataURL(
-      "T:"+b.token+" "+b.name+" "+b.doctor+" "+b.clinic+" "+b.date,
-      { width:64, margin:1, color:{ dark:"#000000", light:"#00000000" } }
-    );
-  } catch(e) {}
-  const lines = buildLines(b);
-  let H = TH + 4;
-  for (const l of lines) H += measureH(l);
-  if (qrDataURL) H += 52;
-  H += TH + 4;
-  const canvas = document.createElement("canvas");
-  canvas.width = W*SCALE; canvas.height = H*SCALE;
-  const ctx = canvas.getContext("2d");
-  ctx.scale(SCALE, SCALE);
-  // Zigzag clip
-  const tW=7, nT=Math.floor(W/tW), tS=(W-nT*tW)/2;
-  ctx.beginPath(); ctx.moveTo(0,TH);
-  for(let i=0;i<nT;i++){const x=tS+i*tW;ctx.lineTo(x+tW/2,0);ctx.lineTo(x+tW,TH);}
-  ctx.lineTo(W,TH);ctx.lineTo(W,H-TH);
-  for(let i=nT;i>0;i--){const x=tS+i*tW;ctx.lineTo(x-tW/2,H);ctx.lineTo(x-tW,H-TH);}
-  ctx.lineTo(0,H-TH); ctx.closePath(); ctx.clip();
-  ctx.fillStyle="#fefdf5"; ctx.fillRect(0,0,W,H);
-  for(let y=TH;y<H-TH;y+=3){ctx.fillStyle="rgba(0,0,0,0.006)";ctx.fillRect(0,y,W,1);}
-  let y=TH+4; for(const l of lines) y=drawLine(ctx,l,y,W,PAD);
-  if (qrDataURL) {
-    const qs=46,qx=(W-qs)/2,qi=new Image();
-    await new Promise(res=>{qi.onload=res;qi.src=qrDataURL;});
-    ctx.fillStyle="#fff"; ctx.fillRect(qx-2,y-1,qs+4,qs+4);
-    ctx.drawImage(qi,qx,y,qs,qs);
-  }
-  const a=document.createElement("a");
-  a.download="Receipt_T"+b.token+"_"+b.date+".png";
-  a.href=canvas.toDataURL("image/png"); a.click();
-}
-function buildLines(b){
-  const L=[],g=h=>L.push({t:"gap",h}),d=()=>L.push({t:"dash"}),
-    c=(txt,sz,bold,col)=>L.push({t:"c",txt,sz:sz||8,bold:!!bold,col:col||"#222"}),
-    row=(lbl,val)=>L.push({t:"row",lbl,val});
-  g(3); c("SMILE DENTAL HOSPITAL",10,true,"#000"); g(2);
-  c(b.clinic,7.5,false,"#444"); c(b.clinicAddress,7,false,"#777");
-  g(4); d(); g(4); c("APPOINTMENT RECEIPT",8,true,"#333");
-  g(5); c("TOKEN NO.",7,false,"#888"); g(1); c("#"+b.token,28,true,"#000");
-  g(6); d(); g(5);
-  row("DOCTOR",b.doctor);   g(2); row("PATIENT",b.name);    g(2);
-  row("PHONE",b.phone);     g(2); row("ADDRESS",b.address); g(2);
-  row("APPT DATE",b.date);  g(2); row("BOOKED AT",b.timestamp);
-  g(5); d(); g(4); c("** APPOINTMENT CONFIRMED **",7,true,"#000"); g(2);
-  c("Carry this to your appointment",6.5,false,"#888"); g(6);
-  return L;
-}
-function measureH(l){
-  if(l.t==="gap") return l.h||4; if(l.t==="dash") return 8;
-  if(l.t==="c")   return(l.sz||8)*1.55; if(l.t==="row") return 20; return 8;
-}
-function drawLine(ctx,l,y,W,PAD){
-  ctx.textBaseline="top";
-  if(l.t==="gap") return y+(l.h||4);
-  if(l.t==="dash"){
-    ctx.font="6px monospace";ctx.fillStyle="#ccc";ctx.textAlign="center";
-    ctx.fillText("- - - - - - - - - - - - - - - - - - - - - -",W/2,y);return y+8;
-  }
-  if(l.t==="c"){
-    ctx.font=(l.bold?"bold ":"")+l.sz+"px 'Courier New',monospace";
-    ctx.fillStyle=l.col;ctx.textAlign="center";
-    const words=String(l.txt).split(" ");let ln="",ly=y,lh=l.sz*1.25;
-    for(const w of words){const t=ln?ln+" "+w:w;
-      if(ctx.measureText(t).width>W-PAD*2&&ln){ctx.fillText(ln,W/2,ly);ln=w;ly+=lh;}else ln=t;}
-    ctx.fillText(ln,W/2,ly);return ly+l.sz*1.55;
-  }
-  if(l.t==="row"){
-    const vx=PAD+46,vmw=W-PAD-vx;
-    ctx.font="bold 6.5px 'Courier New',monospace";ctx.fillStyle="#666";
-    ctx.textAlign="left";ctx.fillText(l.lbl,PAD,y);
-    ctx.font="6.5px 'Courier New',monospace";ctx.fillStyle="#111";
-    const words=String(l.val||"").split(" ");let ln="",ly=y;
-    for(const w of words){const t=ln?ln+" "+w:w;
-      if(ctx.measureText(t).width>vmw&&ln){ctx.textAlign="right";ctx.fillText(ln,W-PAD,ly);ln=w;ly+=9;}else ln=t;}
-    ctx.textAlign="right";ctx.fillText(ln,W-PAD,ly);return Math.max(y+12,ly+9);
-  }
-  return y;
-}
-
-// ── STATE MACHINE ────────────────────────────────────────────────
-function setState(s) {
-  bookingState=s; $btn.disabled=true; $btn.className="";
-  switch(s){
-    case "idle":     $btn.innerText="Book Appointment"; break;
-    case "checking": $btn.innerText="Checking…"; $btn.classList.add("chk"); break;
-    case "ready":    $btn.innerText="Book Appointment"; $btn.classList.add("ready"); $btn.disabled=false; break;
-    case "duplicate":$btn.innerText="Duplicate Appointment"; $btn.classList.add("dup"); break;
-    case "full":     $btn.innerText="No Slots Available"; $btn.classList.add("noslot"); break;
-    case "booking":  $btn.innerText="Booking…"; $btn.classList.add("booking"); break;
-    case "done":     $btn.innerText="✓ Appointment Booked"; $btn.classList.add("booked"); break;
-  }
-}
-function setStatus(m,c){$status.textContent=m;$status.className=c;}
-function clearStatus(){$status.textContent="";$status.className="";}
-
-// ── ADMIN (header tap → redirect) ────────────────────────────────
-document.getElementById("headerBar").addEventListener("click",()=>{
-  $adm.value="";$adm.style.pointerEvents="auto";$adm.focus();
-});
-$adm.addEventListener("input",()=>{
-  if(adminPassword&&$adm.value===adminPassword)
-    window.location.href="https://duckduckgo.com";
-});
+tabs.onchange = loadData;
 </script>
+
 </body>
 </html>
