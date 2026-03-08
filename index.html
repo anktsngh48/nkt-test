@@ -50,6 +50,8 @@
   /* Hidden in fullscreen */
   :fullscreen #fsBar,
   :-webkit-full-screen #fsBar { display: none; }
+  :fullscreen #selectorStrip,
+  :-webkit-full-screen #selectorStrip { display: none; }
 
   /* ── MAIN LAYOUT ──────────────────────────────────────────── */
   #app {
@@ -319,7 +321,7 @@
     <div id="tokenCard">
       <div id="nsPill" class="off">
         <span id="pulseDot"></span>
-        <span id="pillText">Waiting</span>
+        <span id="pillText">Now Serving</span>
       </div>
       <div id="nsLabel">NOW SERVING</div>
       <div id="tokenNum" class="none">—</div>
@@ -373,7 +375,7 @@ document.getElementById("fsBar").addEventListener("click", () => {
 function tickClock() {
   document.getElementById("clock").textContent =
     new Date().toLocaleTimeString("en-IN", {
-      hour: "2-digit", minute: "2-digit", second: "2-digit", hour12: false
+      hour: "2-digit", minute: "2-digit", second: "2-digit", hour12: true
     });
 }
 setInterval(tickClock, 1000);
@@ -491,17 +493,17 @@ function renderToken(ns) {
       void $num.offsetWidth; // force reflow
       $num.className = "pop";
     }
-    $num.textContent = ns;
-    $sub.textContent = selectedDoctor + "  ·  " + selectedClinic;
+    $num.textContent = "Token: " + ns;
+    $sub.textContent = "";
     $pill.className  = "";
-    $pill_text.textContent = "Live";
+    $pill_text.textContent = "Now Serving";
     lastToken = ns;
   } else {
     $num.className   = "none";
     $num.textContent = "Not started";
-    $sub.textContent = selectedDoctor + "  ·  " + selectedClinic;
+    $sub.textContent = "";
     $pill.className  = "off";
-    $pill_text.textContent = "Waiting";
+    $pill_text.textContent = "Now Serving";
     lastToken = null;
   }
 }
