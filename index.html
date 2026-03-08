@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Now Serving — Smile Dental Hospital</title>
+<title>Now Serving</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@300;600;800&family=Barlow:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
@@ -21,254 +21,179 @@
     --green:     #00d084;
   }
 
-  html, body {
-    height: 100%;
-    background: var(--bg);
-    color: var(--text);
-    font-family: 'Barlow', sans-serif;
-    overflow: hidden;
-    user-select: none;
-  }
+  html, body { height: 100%; background: var(--bg); color: var(--text); font-family: 'Barlow', sans-serif; overflow: hidden; user-select: none; }
 
   /* ── FULLSCREEN BAR ───────────────────────────────────────── */
   #fsBar {
-    position: fixed;
-    top: 0; left: 0; right: 0;
-    z-index: 100;
-    background: var(--blue);
-    color: white;
-    text-align: center;
-    padding: 10px;
-    font-size: 15px;
-    font-weight: 600;
-    letter-spacing: 0.5px;
-    cursor: pointer;
+    position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+    background: var(--blue); color: white; text-align: center;
+    padding: 10px; font-size: 15px; font-weight: 600; letter-spacing: 0.5px; cursor: pointer;
   }
   #fsBar:hover { background: var(--blue-dark); }
-  :fullscreen #fsBar,         :-webkit-full-screen #fsBar        { display: none; }
-  :fullscreen #selectorStrip, :-webkit-full-screen #selectorStrip{ display: none; }
+  :fullscreen #fsBar,          :-webkit-full-screen #fsBar          { display: none; }
+  :fullscreen #selectorStrip,  :-webkit-full-screen #selectorStrip  { display: none; }
 
-  /* ── LAYOUT ───────────────────────────────────────────────── */
-  #app {
-    display: flex;
-    flex-direction: column;
-    height: 100vh;
-    padding-top: 42px;
-  }
+  /* ── OUTER LAYOUT ─────────────────────────────────────────── */
+  #app { display: flex; flex-direction: column; height: 100vh; padding-top: 42px; }
   :fullscreen #app, :-webkit-full-screen #app { padding-top: 0; }
 
   /* ── HEADER ───────────────────────────────────────────────── */
   #topBar {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 18px 40px;
-    border-bottom: 1px solid var(--border);
-    background: var(--bg2);
-    flex-shrink: 0;
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 18px 40px; border-bottom: 1px solid var(--border);
+    background: var(--bg2); flex-shrink: 0;
   }
   #hospitalName {
     font-family: 'Barlow Condensed', sans-serif;
-    font-size: clamp(18px, 2.2vw, 30px);
-    font-weight: 800;
-    letter-spacing: 1px;
-    text-transform: uppercase;
-    color: white;
+    font-size: clamp(18px, 2.2vw, 30px); font-weight: 800;
+    letter-spacing: 1px; text-transform: uppercase; color: white;
   }
   #hospitalName span { color: var(--blue); }
   #clock {
     font-family: 'Barlow Condensed', sans-serif;
-    font-size: clamp(20px, 2.5vw, 34px);
-    font-weight: 600;
-    color: var(--muted);
-    letter-spacing: 2px;
+    font-size: clamp(20px, 2.5vw, 34px); font-weight: 600;
+    color: var(--muted); letter-spacing: 2px;
   }
 
   /* ── SELECTOR STRIP ───────────────────────────────────────── */
   #selectorStrip {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    padding: 14px 40px;
-    border-bottom: 1px solid var(--border);
-    background: var(--bg2);
-    flex-shrink: 0;
-    flex-wrap: wrap;
+    display: flex; align-items: center; gap: 10px;
+    padding: 14px 40px; border-bottom: 1px solid var(--border);
+    background: var(--bg2); flex-shrink: 0; flex-wrap: wrap;
   }
-  .sel-label {
-    font-size: 11px; font-weight: 600; letter-spacing: 1.5px;
-    text-transform: uppercase; color: var(--muted); margin-right: 4px;
-  }
+  .sel-label { font-size: 11px; font-weight: 600; letter-spacing: 1.5px; text-transform: uppercase; color: var(--muted); margin-right: 4px; }
   .sel-divider { width: 1px; height: 28px; background: var(--border); margin: 0 8px; }
   .sel-btn {
     background: transparent; border: 1px solid var(--border); color: var(--muted);
     padding: 7px 18px; border-radius: 6px; font-family: 'Barlow', sans-serif;
-    font-size: clamp(12px, 1.2vw, 15px); font-weight: 500; cursor: pointer;
-    transition: all .2s; white-space: nowrap;
+    font-size: clamp(12px, 1.2vw, 15px); font-weight: 500; cursor: pointer; transition: all .2s; white-space: nowrap;
   }
   .sel-btn:hover  { border-color: var(--blue); color: white; }
   .sel-btn.active { background: var(--blue); border-color: var(--blue); color: white; }
 
-  /* ── DISPLAY AREA ─────────────────────────────────────────── */
+  /* ── MAIN CONTENT ROW (left + right) ─────────────────────── */
   #display {
+    flex: 1;
+    display: flex;
+    flex-direction: row;
+    overflow: hidden;
+    position: relative;
+  }
+
+  /* Background glow — only on left panel */
+  #leftPanel::before {
+    content: '';
+    position: absolute;
+    width: 60%; height: 100%;
+    left: 20%;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(0,114,255,0.07) 0%, transparent 70%);
+    pointer-events: none;
+    z-index: 0;
+  }
+  /* Grid texture — whole display */
+  #display::after {
+    content: '';
+    position: absolute; inset: 0;
+    background-image: linear-gradient(var(--border) 1px, transparent 1px), linear-gradient(90deg, var(--border) 1px, transparent 1px);
+    background-size: 60px 60px;
+    pointer-events: none; opacity: 0.35; z-index: 0;
+  }
+
+  /* ── LEFT PANEL (token) ───────────────────────────────────── */
+  #leftPanel {
     flex: 1;
     display: flex;
     align-items: center;
     justify-content: center;
     position: relative;
-    overflow: hidden;
+    border-right: 1px solid var(--border);
   }
+  /* When no right panel, left panel takes full width */
+  #leftPanel.full { border-right: none; }
 
-  /* Background glow */
-  #display::before {
-    content: '';
-    position: absolute;
-    width: 60vw; height: 60vw;
-    border-radius: 50%;
-    background: radial-gradient(circle, rgba(0,114,255,0.07) 0%, transparent 70%);
-    pointer-events: none;
-  }
-  /* Grid texture */
-  #display::after {
-    content: '';
-    position: absolute;
-    inset: 0;
-    background-image:
-      linear-gradient(var(--border) 1px, transparent 1px),
-      linear-gradient(90deg, var(--border) 1px, transparent 1px);
-    background-size: 60px 60px;
-    pointer-events: none;
-    opacity: 0.4;
-  }
-
-  /* ── TOKEN CARD (centre) ──────────────────────────────────── */
+  /* ── TOKEN CARD ───────────────────────────────────────────── */
   #tokenCard {
-    position: relative;
-    z-index: 2;
-    text-align: center;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 0;
+    position: relative; z-index: 2;
+    display: flex; flex-direction: column; align-items: center; text-align: center;
   }
 
-  /* Pill — green when serving, grey when waiting */
+  /* Pill */
   #nsPill {
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-    background: rgba(0,208,132,0.12);
-    border: 1px solid rgba(0,208,132,0.25);
-    color: var(--green);
-    font-size: 12px; font-weight: 600; letter-spacing: 1.5px;
-    text-transform: uppercase;
-    padding: 5px 14px;
-    border-radius: 20px;
-    margin-bottom: 20px;
+    display: inline-flex; align-items: center; gap: 8px;
+    background: rgba(0,208,132,0.12); border: 1px solid rgba(0,208,132,0.25);
+    color: var(--green); font-size: 12px; font-weight: 600; letter-spacing: 1.5px;
+    text-transform: uppercase; padding: 5px 14px; border-radius: 20px; margin-bottom: 20px;
   }
-  #nsPill.waiting {
-    background: rgba(90,106,136,0.15);
-    border-color: rgba(90,106,136,0.25);
-    color: var(--muted);
-  }
-  #pulseDot {
-    width: 7px; height: 7px; border-radius: 50%;
-    background: var(--green);
-    animation: dotpulse 1.8s ease-in-out infinite;
-  }
+  #nsPill.waiting { background: rgba(90,106,136,0.15); border-color: rgba(90,106,136,0.25); color: var(--muted); }
+  #pulseDot { width: 7px; height: 7px; border-radius: 50%; background: var(--green); animation: dotpulse 1.8s ease-in-out infinite; }
   #nsPill.waiting #pulseDot { background: var(--muted); animation: none; }
-  @keyframes dotpulse {
-    0%,100% { opacity:1; transform:scale(1); }
-    50%      { opacity:.3; transform:scale(1.6); }
-  }
+  @keyframes dotpulse { 0%,100%{opacity:1;transform:scale(1);} 50%{opacity:.3;transform:scale(1.6);} }
 
-  /* Big token */
+  /* Big token number */
   #tokenNum {
     font-family: 'Barlow Condensed', sans-serif;
-    font-size: clamp(80px, 18vw, 240px);
-    font-weight: 800;
-    line-height: 0.95;
-    color: white;
+    font-size: clamp(70px, 14vw, 200px);
+    font-weight: 800; line-height: 0.95; color: white;
     text-shadow: 0 0 80px var(--blue-glow), 0 0 160px var(--blue-glow);
     letter-spacing: -2px;
   }
-  #tokenNum.none {
-    font-size: clamp(28px, 4.5vw, 58px);
-    color: var(--muted);
-    text-shadow: none;
-    letter-spacing: 0;
-    font-weight: 300;
-  }
-  @keyframes tokenPop {
-    0%  { transform: scale(0.85); opacity: 0; }
-    60% { transform: scale(1.04); }
-    100%{ transform: scale(1);    opacity: 1; }
-  }
+  #tokenNum.none { font-size: clamp(24px, 4vw, 52px); color: var(--muted); text-shadow: none; letter-spacing: 0; font-weight: 300; }
+  @keyframes tokenPop { 0%{transform:scale(0.85);opacity:0;} 60%{transform:scale(1.04);} 100%{transform:scale(1);opacity:1;} }
   #tokenNum.pop { animation: tokenPop .45s cubic-bezier(.34,1.56,.64,1) forwards; }
 
-  /* Updated time below token */
-  #updatedTime {
-    margin-top: 16px;
-    font-size: clamp(11px, 1.1vw, 14px);
-    color: var(--muted);
-    letter-spacing: 0.3px;
-  }
-  #updatedTime span { color: var(--blue); font-weight: 600; }
-
-  /* ── APP PROMO PANEL (below token) ───────────────────────── */
+  /* Promo panel (below token) */
   #promoPanel {
-    display: none;             /* shown via JS if TVLeftScreen row exists */
-    position: relative;
-    z-index: 2;
-    flex-direction: row;
-    align-items: center;
-    text-align: left;
-    gap: 16px;
-    margin-top: 28px;
-    padding: 18px 24px;
-    border: 1px solid var(--border);
-    border-radius: 14px;
-    background: rgba(13,21,38,0.8);
-    backdrop-filter: blur(8px);
-    max-width: clamp(260px, 38vw, 520px);
+    display: none;
+    flex-direction: row; align-items: center; gap: 16px;
+    margin-top: 28px; padding: 16px 22px;
+    border: 1px solid var(--border); border-radius: 14px;
+    background: rgba(13,21,38,0.85); backdrop-filter: blur(8px);
+    max-width: clamp(240px, 32vw, 480px);
   }
-  #promoText {
-    font-size: clamp(12px, 1.2vw, 16px);
-    color: var(--text);
-    line-height: 1.6;
-    font-weight: 500;
+  #promoText { font-size: clamp(11px, 1.1vw, 15px); color: var(--text); line-height: 1.6; font-weight: 500; flex: 1; text-align: left; }
+  #promoImg  { width: clamp(64px, 6.5vw, 100px); height: clamp(64px, 6.5vw, 100px); object-fit: contain; border-radius: 8px; background: white; padding: 5px; flex-shrink: 0; }
+
+  /* ── RIGHT PANEL (media) ──────────────────────────────────── */
+  #rightPanel {
+    display: none;                /* shown by JS when TVRightScreen row has content */
     flex: 1;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 20px;
+    padding: 30px 40px;
+    position: relative; z-index: 1;
+    overflow: hidden;
   }
-  #promoImg {
-    width: clamp(70px, 7vw, 110px);
-    height: clamp(70px, 7vw, 110px);
-    object-fit: contain;
-    border-radius: 8px;
-    background: white;
-    padding: 6px;
-    flex-shrink: 0;
+  #rightText {
+    font-size: clamp(14px, 1.5vw, 22px);
+    font-weight: 500; color: var(--text); line-height: 1.65;
+    text-align: center; max-width: 90%;
+  }
+  /* Image and GIF share same style */
+  .right-media-img {
+    max-width: 88%; max-height: 45vh;
+    border-radius: 12px; object-fit: contain;
+  }
+  /* Video iframe */
+  #rightVideo {
+    width: 100%; max-width: 640px;
+    aspect-ratio: 16/9;
+    border: none; border-radius: 12px;
+    background: #000;
   }
 
   /* ── STATUS BAR ───────────────────────────────────────────── */
   #statusBar {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 12px 40px;
-    border-top: 1px solid var(--border);
-    background: var(--bg2);
-    flex-shrink: 0;
+    display: none;
+    align-items: center; justify-content: space-between;
+    padding: 12px 40px; border-top: 1px solid var(--border);
+    background: var(--bg2); flex-shrink: 0;
   }
-  #statusBarText {
-    font-size: clamp(11px, 1.1vw, 14px);
-    color: var(--muted);
-  }
-  #refreshInfo {
-    font-size: clamp(11px, 1.1vw, 13px);
-    color: var(--muted);
-    letter-spacing: 0.3px;
-  }
-  #countdown { display: inline-block; color: var(--blue); font-weight: 600; min-width: 22px; }
+  #statusBarText { font-size: clamp(11px, 1.1vw, 14px); color: var(--muted); }
+  #refreshInfo   { font-size: clamp(11px, 1.1vw, 13px); color: var(--muted); letter-spacing: 0.3px; }
+  #countdown     { display: inline-block; color: var(--blue); font-weight: 600; min-width: 22px; }
 </style>
 </head>
 <body>
@@ -277,13 +202,11 @@
 
 <div id="app">
 
-  <!-- Header -->
   <div id="topBar">
     <div id="hospitalName">Loading<span>…</span></div>
     <div id="clock">--:--:--</div>
   </div>
 
-  <!-- Doctor / Clinic selector (hidden in fullscreen) -->
   <div id="selectorStrip">
     <span class="sel-label">Doctor</span>
     <div id="doctorBtns" style="display:flex;gap:8px;flex-wrap:wrap;"></div>
@@ -292,130 +215,198 @@
     <div id="clinicBtns" style="display:flex;gap:8px;flex-wrap:wrap;"></div>
   </div>
 
-  <!-- Main display -->
   <div id="display">
 
-    <!-- Token card (centre) -->
-    <div id="tokenCard">
-      <!-- Pill: green "Now Serving" or grey "Waiting" -->
-      <div id="nsPill" class="waiting">
-        <span id="pulseDot"></span>
-        <span id="pillText">Waiting</span>
+    <!-- LEFT: token + promo -->
+    <div id="leftPanel" class="full">
+      <div id="tokenCard">
+        <div id="nsPill" class="waiting">
+          <span id="pulseDot"></span>
+          <span id="pillText">Waiting</span>
+        </div>
+        <div id="tokenNum" class="none">—</div>
+        <!-- Promo: text + QR image below token -->
+        <div id="promoPanel">
+          <div id="promoText"></div>
+          <img id="promoImg" alt="QR Code" style="display:none;">
+        </div>
       </div>
-      <!-- Token number -->
-      <div id="tokenNum" class="none">—</div>
-      <!-- Last updated time -->
-      <div id="updatedTime">Updating…</div>
-      <!-- App promo — shown only if TVLeftScreen row has content -->
-      <div id="promoPanel">
-        <div id="promoText"></div>
-        <img id="promoImg" alt="App QR" style="display:none;">
-      </div>
+    </div>
+
+    <!-- RIGHT: media panel (text / image / gif / video) -->
+    <div id="rightPanel">
+      <div id="rightText"   style="display:none;"></div>
+      <img id="rightImg"    class="right-media-img" alt="" style="display:none;">
+      <img id="rightGif"    class="right-media-img" alt="" style="display:none;">
+      <iframe id="rightVideo" allowfullscreen allow="autoplay; encrypted-media" style="display:none;"></iframe>
     </div>
 
   </div>
 
-  <!-- Status bar — shown only if TVStatusBar row has content -->
-  <div id="statusBar" style="display:none;">
+  <div id="statusBar">
     <div id="statusBarText"></div>
-    <div id="refreshInfo">
-      Refreshes in <span id="countdown">20</span>s
-    </div>
+    <div id="refreshInfo">Refreshes in <span id="countdown">20</span>s</div>
   </div>
 
 </div>
 
 <script>
-// ── REPLACE WITH YOUR WEB APP URL ──────────────────────────────
+// ── PASTE YOUR WEB APP URL HERE ─────────────────────────────────
 const SCRIPT_URL = "https://script.google.com/macros/s/AKfycby6hVR6u3QCODIrQ8lRybb4AusvejbUxaLPLs4rt8LiQs1YJKVvQ4LqvlwKTBshH-VjOA/exec";
 // ────────────────────────────────────────────────────────────────
 
-let settingsData          = [];
-let selectedDoctor        = "";
-let selectedClinic        = "";
-let refreshTimer          = null;
-let countdownTimer        = null;
-let countdown             = 20;
-let lastToken             = null;
+let settingsData   = [];
+let selectedDoctor = "";
+let selectedClinic = "";
+let refreshTimer   = null;
+let cdTimer        = null;
+let countdown      = 20;
+let lastToken      = null;
 
-// Today's date DD-MM-YYYY
 function todayStr() {
   const d = new Date();
-  return String(d.getDate()).padStart(2,"0") + "-" +
-         String(d.getMonth()+1).padStart(2,"0") + "-" + d.getFullYear();
+  return String(d.getDate()).padStart(2,"0") + "-" + String(d.getMonth()+1).padStart(2,"0") + "-" + d.getFullYear();
 }
 
-// ── FULLSCREEN ────────────────────────────────────────────────
+// ── FULLSCREEN ─────────────────────────────────────────────────
 document.getElementById("fsBar").addEventListener("click", () => {
   const el = document.documentElement;
-  if      (el.requestFullscreen)            el.requestFullscreen();
-  else if (el.webkitRequestFullscreen)      el.webkitRequestFullscreen();
-  else if (el.mozRequestFullScreen)         el.mozRequestFullScreen();
-  else if (el.msRequestFullscreen)          el.msRequestFullscreen();
+  if      (el.requestFullscreen)       el.requestFullscreen();
+  else if (el.webkitRequestFullscreen) el.webkitRequestFullscreen();
+  else if (el.mozRequestFullScreen)    el.mozRequestFullScreen();
+  else if (el.msRequestFullscreen)     el.msRequestFullscreen();
 });
 
-// ── CLOCK (AM/PM) ─────────────────────────────────────────────
+// ── CLOCK ──────────────────────────────────────────────────────
 function tickClock() {
   document.getElementById("clock").textContent =
-    new Date().toLocaleTimeString("en-IN", {
-      hour: "2-digit", minute: "2-digit", second: "2-digit", hour12: true
-    });
+    new Date().toLocaleTimeString("en-IN", { hour:"2-digit", minute:"2-digit", second:"2-digit", hour12:true });
 }
 setInterval(tickClock, 1000);
 tickClock();
 
-// ── LOAD SETTINGS ─────────────────────────────────────────────
+// ── GOOGLE PHOTOS URL FIX ──────────────────────────────────────
+// Google Photos sharing URLs can't be hotlinked directly.
+// This converts lh3.googleusercontent.com URLs to direct-usable form.
+// For photos.app.goo.gl short links, the user must get the direct
+// lh3.googleusercontent.com URL (open photo → share → copy link → paste in browser → copy final URL).
+function fixImageUrl(url) {
+  if (!url) return "";
+  url = url.trim();
+  // lh3.googleusercontent.com — append =s0 to get original size if no size param
+  if (url.includes("lh3.googleusercontent.com") && !url.includes("=s") && !url.includes("=w")) {
+    return url + "=s600";
+  }
+  // Google Drive file — convert to direct thumbnail
+  const driveMatch = url.match(/drive\.google\.com\/file\/d\/([^/]+)/);
+  if (driveMatch) {
+    return "https://drive.google.com/thumbnail?id=" + driveMatch[1] + "&sz=w600";
+  }
+  return url;
+}
+
+// ── YOUTUBE URL → EMBED ────────────────────────────────────────
+function toYouTubeEmbed(url) {
+  if (!url) return "";
+  url = url.trim();
+  // Already an embed URL
+  if (url.includes("youtube.com/embed/")) return url;
+  // youtu.be/ID
+  let m = url.match(/youtu\.be\/([^?&]+)/);
+  if (m) return "https://www.youtube.com/embed/" + m[1] + "?autoplay=1&mute=1&loop=1&playlist=" + m[1];
+  // youtube.com/watch?v=ID
+  m = url.match(/[?&]v=([^&]+)/);
+  if (m) return "https://www.youtube.com/embed/" + m[1] + "?autoplay=1&mute=1&loop=1&playlist=" + m[1];
+  // Any other URL — try as-is in iframe
+  return url;
+}
+
+// ── LOAD SETTINGS ──────────────────────────────────────────────
 async function loadSettings() {
   try {
     const r = await fetch(SCRIPT_URL + "?action=getSettings");
     settingsData = await r.json();
 
-    // 1. Hospital name (Header row)
+    // Hospital name
     const hRow = settingsData.find(r => r[0] === "Header");
-    const hospitalName = (hRow && hRow[1]) ? String(hRow[1]).trim() : "Smile Dental Hospital";
-    const words = hospitalName.split(" ");
-    const last  = words.pop();
-    document.getElementById("hospitalName").innerHTML =
-      words.join(" ") + " <span>" + last + "</span>";
-    document.title = "Now Serving — " + hospitalName;
+    const name = (hRow && hRow[1]) ? String(hRow[1]).trim() : "Smile Dental Hospital";
+    const words = name.split(" "), last = words.pop();
+    document.getElementById("hospitalName").innerHTML = words.join(" ") + " <span>" + last + "</span>";
+    document.title = "Now Serving — " + name;
 
-    // 2. Status bar (TVStatusBar row) — hide if Name is blank
+    // Status bar (TVStatusBar → Name column)
     const sbRow  = settingsData.find(r => r[0] === "TVStatusBar");
-    const sbText = (sbRow && String(sbRow[1]||"").trim()) ? String(sbRow[1]).trim() : "";
+    const sbText = sbRow ? String(sbRow[1] || "").trim() : "";
     if (sbText) {
       document.getElementById("statusBarText").textContent = sbText;
       document.getElementById("statusBar").style.display  = "flex";
     }
-    // else: statusBar stays display:none
 
-    // 3. App promo panel (TVLeftScreen row) — hide if Name is blank
-    const promoRow  = settingsData.find(r => r[0] === "TVLeftScreen");
-    const promoText = (promoRow && String(promoRow[1]||"").trim()) ? String(promoRow[1]).trim() : "";
-    const promoImgUrl = (promoRow && String(promoRow[2]||"").trim()) ? String(promoRow[2]).trim() : "";
-    if (promoText) {
-      document.getElementById("promoText").textContent    = promoText;
+    // Left screen promo (TVLeftScreen → Name=text, Extra1=image url)
+    const pRow     = settingsData.find(r => r[0] === "TVLeftScreen");
+    const pText    = pRow ? String(pRow[1] || "").trim() : "";
+    const pImgRaw  = pRow ? String(pRow[2] || "").trim() : "";
+    if (pText) {
+      document.getElementById("promoText").textContent    = pText;
       document.getElementById("promoPanel").style.display = "flex";
-      if (promoImgUrl) {
+      if (pImgRaw) {
         const img = document.getElementById("promoImg");
-        img.src           = promoImgUrl;
+        img.src           = fixImageUrl(pImgRaw);
         img.style.display = "block";
       }
     }
-    // else: promoPanel stays display:none
+
+    // Right panel (TVRightScreen → Name=text, Extra1=image, Extra2=gif, Qualification=video)
+    // Settings columns: [0]=Type [1]=Name [2]=Extra1 [3]=Extra2 [4]=Qualification
+    const rRow   = settingsData.find(r => r[0] === "TVRightScreen");
+    const rText  = rRow ? String(rRow[1] || "").trim() : "";
+    const rImg   = rRow ? String(rRow[2] || "").trim() : "";
+    const rGif   = rRow ? String(rRow[3] || "").trim() : "";
+    const rVideo = rRow ? String(rRow[4] || "").trim() : "";
+
+    const hasRight = rText || rImg || rGif || rVideo;
+    if (hasRight) {
+      const rightPanel = document.getElementById("rightPanel");
+      rightPanel.style.display = "flex";
+      // Remove "full" class from left panel so border shows
+      document.getElementById("leftPanel").classList.remove("full");
+
+      if (rText) {
+        const el = document.getElementById("rightText");
+        el.textContent    = rText;
+        el.style.display  = "block";
+      }
+      if (rImg) {
+        const el = document.getElementById("rightImg");
+        el.src           = fixImageUrl(rImg);
+        el.style.display = "block";
+      }
+      if (rGif) {
+        const el = document.getElementById("rightGif");
+        el.src           = fixImageUrl(rGif);
+        el.style.display = "block";
+      }
+      if (rVideo) {
+        const el = document.getElementById("rightVideo");
+        el.src           = toYouTubeEmbed(rVideo);
+        el.style.display = "block";
+      }
+    }
 
     buildDoctorButtons();
     buildClinicButtons();
   } catch(e) {
     document.getElementById("hospitalName").textContent = "Smile Dental Hospital";
+    console.error("Settings load failed:", e);
   }
 }
 
-// ── DOCTOR BUTTONS ────────────────────────────────────────────
+// ── DOCTOR BUTTONS ─────────────────────────────────────────────
 function buildDoctorButtons() {
   const wrap = document.getElementById("doctorBtns");
   settingsData.filter(r => r[0] === "Doctor").forEach((d, i) => {
     const b = document.createElement("button");
-    b.className   = "sel-btn" + (i === 0 ? " active" : "");
+    b.className = "sel-btn" + (i === 0 ? " active" : "");
     b.textContent = d[1].trim();
     b.addEventListener("click", () => {
       document.querySelectorAll("#doctorBtns .sel-btn").forEach(x => x.classList.remove("active"));
@@ -428,12 +419,12 @@ function buildDoctorButtons() {
   });
 }
 
-// ── CLINIC BUTTONS ────────────────────────────────────────────
+// ── CLINIC BUTTONS ─────────────────────────────────────────────
 function buildClinicButtons() {
   const wrap = document.getElementById("clinicBtns");
   settingsData.filter(r => r[0] === "Clinic").forEach((c, i) => {
     const b = document.createElement("button");
-    b.className   = "sel-btn" + (i === 0 ? " active" : "");
+    b.className = "sel-btn" + (i === 0 ? " active" : "");
     b.textContent = c[1].trim();
     b.addEventListener("click", () => {
       document.querySelectorAll("#clinicBtns .sel-btn").forEach(x => x.classList.remove("active"));
@@ -444,85 +435,67 @@ function buildClinicButtons() {
     wrap.appendChild(b);
     if (i === 0) selectedClinic = c[1].trim();
   });
-  resetAndFetch(); // initial fetch after both dropdowns ready
+  resetAndFetch();
 }
 
-// ── FETCH NOW SERVING ─────────────────────────────────────────
-// Always passes today's date — token only shows if marked "in" today
+// ── FETCH NOW SERVING ──────────────────────────────────────────
 async function fetchNowServing() {
   try {
     const r = await fetch(
       SCRIPT_URL + "?action=getNowServing" +
       "&doctor=" + encodeURIComponent(selectedDoctor) +
       "&clinic=" + encodeURIComponent(selectedClinic) +
-      "&date="   + encodeURIComponent(todayStr())   // ← today only
+      "&date="   + encodeURIComponent(todayStr())
     );
-    const d  = await r.json();
+    const d = await r.json();
     renderToken(Number(d.nowServing) || 0);
-  } catch(e) {
-    setUpdatedTime("Update failed");
-  }
+  } catch(e) { /* silent fail — keep showing last token */ }
 }
 
-// ── RENDER TOKEN ──────────────────────────────────────────────
+// ── RENDER TOKEN ───────────────────────────────────────────────
 function renderToken(ns) {
-  const $num  = document.getElementById("tokenNum");
-  const $pill = document.getElementById("nsPill");
+  const $num      = document.getElementById("tokenNum");
+  const $pill     = document.getElementById("nsPill");
   const $pillText = document.getElementById("pillText");
 
   if (ns > 0) {
     if (ns !== lastToken) {
       $num.className = "";
-      void $num.offsetWidth;     // force reflow for re-animation
+      void $num.offsetWidth;
       $num.className = "pop";
     }
-    $num.textContent    = "Token: " + ns;
-    $pill.className     = "";   // green "Now Serving"
+    $num.textContent      = "Token: " + ns;
+    $pill.className       = "";
     $pillText.textContent = "Now Serving";
     lastToken = ns;
   } else {
-    $num.className      = "none";
-    $num.textContent    = "—";
-    $pill.className     = "waiting";   // grey "Waiting"
+    $num.className        = "none";
+    $num.textContent      = "—";
+    $pill.className       = "waiting";
     $pillText.textContent = "Waiting";
     lastToken = null;
   }
-
-  // Timestamp
-  const t = new Date();
-  setUpdatedTime(
-    "Updated at " +
-    t.toLocaleTimeString("en-IN", { hour:"2-digit", minute:"2-digit", second:"2-digit", hour12: true })
-  );
 }
 
-function setUpdatedTime(txt) {
-  document.getElementById("updatedTime").innerHTML = txt;
-}
-
-// ── COUNTDOWN + AUTO-REFRESH ──────────────────────────────────
+// ── COUNTDOWN + REFRESH ────────────────────────────────────────
 function resetAndFetch() {
   clearInterval(refreshTimer);
-  clearInterval(countdownTimer);
+  clearInterval(cdTimer);
   countdown = 20;
   const $cd = document.getElementById("countdown");
   if ($cd) $cd.textContent = countdown;
 
   fetchNowServing();
 
-  countdownTimer = setInterval(() => {
+  cdTimer = setInterval(() => {
     countdown--;
     if ($cd) $cd.textContent = countdown;
     if (countdown <= 0) countdown = 20;
   }, 1000);
 
-  refreshTimer = setInterval(() => {
-    countdown = 20;
-    fetchNowServing();
-  }, 20000);
+  refreshTimer = setInterval(() => { countdown = 20; fetchNowServing(); }, 20000);
 }
 
-// ── BOOT ──────────────────────────────────────────────────────
 loadSettings();
 </script>
 </body>
