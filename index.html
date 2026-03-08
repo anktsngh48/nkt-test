@@ -273,7 +273,7 @@
       <div id="rightText"   style="display:none;"></div>
       <img id="rightImg"    class="right-media-img" alt="" style="display:none;">
       <img id="rightGif"    class="right-media-img" alt="" style="display:none;">
-      <iframe id="rightVideo" allowfullscreen allow="autoplay; encrypted-media" style="display:none;"></iframe>
+      <iframe id="rightVideo" allowfullscreen allow="autoplay; fullscreen; encrypted-media; picture-in-picture" style="display:none;"></iframe>
     </div>
 
   </div>
@@ -632,8 +632,8 @@ async function pollRightPanel() {
         iframe.src = ""; iframe.style.display = "none";
         currentVideoUrl = "";
       } else if (gestureUnlocked) {
-        // Gesture already given — load new video directly, unmuted
-        loadVideo(embedUrl);
+        // Small delay ensures the panel is rendered before YouTube autoplay fires
+        setTimeout(() => loadVideo(embedUrl), 150);
       } else {
         // Gesture not yet given — this shouldn't happen since overlay
         // always shows at launch, but handle it safely just in case
