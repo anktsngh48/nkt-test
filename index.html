@@ -1,653 +1,673 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-<meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Now Serving</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@300;600;800&family=Barlow:wght@400;500;600&display=swap" rel="stylesheet">
+<title>Smile Dental Hospital</title>
+<script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js"></script>
 <style>
-  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+/* ── PRELOADER ─────────────────────────────────────────────── */
+#preloader{
+  position:fixed;top:0;left:0;width:100%;height:100%;
+  background:#f4f6f9;z-index:9999;
+  display:flex;justify-content:center;align-items:center;text-align:center;
+}
+#preloader p{
+  max-width:420px;margin:auto;font-size:18px;font-weight:700;
+  color:#007bff;line-height:1.6;
+}
 
-  :root {
-    --blue:      #0072FF;
-    --blue-dark: #004FBB;
-    --blue-glow: rgba(0,114,255,0.35);
-    --bg:        #080d1a;
-    --bg2:       #0d1526;
-    --border:    rgba(255,255,255,0.08);
-    --text:      #e8edf5;
-    --muted:     #5a6a88;
-    --green:     #00d084;
-  }
+/* ── BASE ──────────────────────────────────────────────────── */
+body{font-family:Segoe UI,sans-serif;margin:0;background:#f4f6f9;}
+.header{
+  background:#007bff;color:white;padding:18px;
+  text-align:center;font-size:22px;font-weight:600;
+  cursor:pointer;user-select:none;
+}
+.header span{display:block;font-size:14px;font-weight:400;margin-top:3px;}
+.container{padding:20px;max-width:600px;margin:auto;}
+.card{background:white;padding:25px;border-radius:12px;box-shadow:0 6px 18px rgba(0,0,0,0.08);}
 
-  html, body { height: 100%; background: var(--bg); color: var(--text); font-family: 'Barlow', sans-serif; overflow: hidden; user-select: none; }
+/* ── NOW SERVING CARD ──────────────────────────────────────── */
+/* Hidden by default — shown only when token is marked "in" today */
+#nowServingCard{
+  display:none;
+  background:white;border-radius:12px;
+  box-shadow:0 6px 18px rgba(0,0,0,0.08);
+  padding:20px 25px 18px;margin-bottom:18px;
+}
 
-  /* ── FULLSCREEN BAR ───────────────────────────────────────── */
-  #fsBar {
-    position: fixed; top: 0; left: 0; right: 0; z-index: 100;
-    background: var(--blue); color: white; text-align: center;
-    padding: 10px; font-size: 15px; font-weight: 600; letter-spacing: 0.5px; cursor: pointer;
-  }
-  #fsBar:hover { background: var(--blue-dark); }
-  :fullscreen #fsBar,          :-webkit-full-screen #fsBar          { display: none; }
-  :fullscreen #selectorStrip,  :-webkit-full-screen #selectorStrip  { display: none; }
+/* Green pulse dot */
+#liveDot{
+  display:inline-block;width:9px;height:9px;border-radius:50%;
+  background:#28a745;margin-right:7px;vertical-align:middle;
+  animation:pulse 1.8s ease-in-out infinite;
+}
+@keyframes pulse{
+  0%,100%{opacity:1;transform:scale(1);}
+  50%{opacity:.35;transform:scale(1.5);}
+}
+.ns-header{display:flex;align-items:center;margin-bottom:8px;}
+.ns-label{
+  font-size:11px;font-weight:700;letter-spacing:1.8px;
+  color:#888;text-transform:uppercase;
+}
 
-  /* ── OUTER LAYOUT ─────────────────────────────────────────── */
-  #app { display: flex; flex-direction: column; height: 100vh; padding-top: 42px; }
-  :fullscreen #app, :-webkit-full-screen #app { padding-top: 0; }
+/* Token display */
+.ns-token{
+  font-size:42px;font-weight:900;color:#007bff;
+  line-height:1;letter-spacing:-1px;
+}
 
-  /* ── HEADER ───────────────────────────────────────────────── */
-  #topBar {
-    display: flex; align-items: center; justify-content: space-between;
-    padding: 18px 40px; border-bottom: 1px solid var(--border);
-    background: var(--bg2); flex-shrink: 0;
-  }
-  #hospitalName {
-    font-family: 'Barlow Condensed', sans-serif;
-    font-size: clamp(18px, 2.2vw, 30px); font-weight: 800;
-    letter-spacing: 1px; text-transform: uppercase; color: white;
-  }
-  #hospitalName span { color: var(--blue); }
-  #clock {
-    font-family: 'Barlow Condensed', sans-serif;
-    font-size: clamp(20px, 2.5vw, 34px); font-weight: 600;
-    color: var(--muted); letter-spacing: 2px;
-  }
+/* Doctor · Clinic line */
+.ns-sub{font-size:13px;color:#888;margin-top:5px;}
 
-  /* ── SELECTOR STRIP ───────────────────────────────────────── */
-  #selectorStrip {
-    display: flex; align-items: center; gap: 10px;
-    padding: 14px 40px; border-bottom: 1px solid var(--border);
-    background: var(--bg2); flex-shrink: 0; flex-wrap: wrap;
-  }
-  .sel-label { font-size: 11px; font-weight: 600; letter-spacing: 1.5px; text-transform: uppercase; color: var(--muted); margin-right: 4px; }
-  .sel-divider { width: 1px; height: 28px; background: var(--border); margin: 0 8px; }
-  .sel-btn {
-    background: transparent; border: 1px solid var(--border); color: var(--muted);
-    padding: 7px 18px; border-radius: 6px; font-family: 'Barlow', sans-serif;
-    font-size: clamp(12px, 1.2vw, 15px); font-weight: 500; cursor: pointer; transition: all .2s; white-space: nowrap;
-  }
-  .sel-btn:hover  { border-color: var(--blue); color: white; }
-  .sel-btn.active { background: var(--blue); border-color: var(--blue); color: white; }
+/* Refresh timestamp */
+.ns-refresh{display:block;font-size:11px;color:#ccc;margin-top:10px;}
 
-  /* ── MAIN CONTENT ROW (left + right) ─────────────────────── */
-  #display {
-    flex: 1;
-    display: flex;
-    flex-direction: row;
-    overflow: hidden;
-    position: relative;
-  }
+/* ── BOOKING FORM ───────────────────────────────────────────── */
+label{font-weight:600;display:block;margin-top:15px;}
+.doctorSection{display:flex;align-items:flex-start;gap:12px;margin-top:4px;}
+.doctorButtons{flex:1;display:flex;flex-wrap:wrap;gap:8px;align-content:flex-start;}
+.doctorButtons button{
+  width:150px;height:56px;border:1px solid #007bff;background:white;
+  border-radius:8px;cursor:pointer;display:flex;flex-direction:column;
+  justify-content:center;align-items:center;text-align:center;
+  font-size:12px;line-height:1.3;padding:4px 8px;
+  white-space:nowrap;overflow:hidden;
+}
+.doctorButtons button span{font-size:11px;}
+.doctorButtons button.selected{background:#007bff;color:white;}
+#doctorImage{width:100px;height:130px;object-fit:cover;border-radius:6px;display:none;}
 
-  /* Background glow — only on left panel */
-  #leftPanel::before {
-    content: '';
-    position: absolute;
-    width: 60%; height: 100%;
-    left: 20%;
-    border-radius: 50%;
-    background: radial-gradient(circle, rgba(0,114,255,0.07) 0%, transparent 70%);
-    pointer-events: none;
-    z-index: 0;
-  }
-  /* Grid texture — whole display */
-  #display::after {
-    content: '';
-    position: absolute; inset: 0;
-    background-image: linear-gradient(var(--border) 1px, transparent 1px), linear-gradient(90deg, var(--border) 1px, transparent 1px);
-    background-size: 60px 60px;
-    pointer-events: none; opacity: 0.35; z-index: 0;
-  }
+.clinicButtons{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px;}
+.clinicButtons button{
+  border:1px solid #007bff;background:white;border-radius:6px;
+  padding:8px 12px;font-size:13px;cursor:pointer;
+}
+.clinicButtons button.selected{background:#007bff;color:white;}
 
-  /* ── LEFT PANEL (token) ───────────────────────────────────── */
-  #leftPanel {
-    flex: 1;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    position: relative;
-    border-right: 1px solid var(--border);
-  }
-  /* When no right panel, left panel takes full width */
-  #leftPanel.full { border-right: none; }
+input,select{
+  width:100%;padding:12px;margin-top:6px;border-radius:8px;
+  border:1px solid #ddd;font-size:15px;box-sizing:border-box;
+}
+input.err{border-color:#dc3545;}
+.phone-hint{font-size:12px;color:#888;margin-top:3px;}
+.phone-hint.err{color:#dc3545;}
 
-  /* ── TOKEN CARD ───────────────────────────────────────────── */
-  #tokenCard {
-    position: relative; z-index: 2;
-    display: flex; flex-direction: column; align-items: center; text-align: center;
-  }
+.tokenInfo{
+  margin-top:15px;font-weight:bold;text-align:center;
+  font-size:16px;padding:10px;border-radius:8px;
+}
+.tokenInfo.avail{color:#007bff;background:#e8f0fe;}
+.tokenInfo.full {color:#dc3545;background:#fdecea;}
 
-  /* Pill */
-  #nsPill {
-    display: inline-flex; align-items: center; gap: 8px;
-    background: rgba(0,208,132,0.12); border: 1px solid rgba(0,208,132,0.25);
-    color: var(--green); font-size: 12px; font-weight: 600; letter-spacing: 1.5px;
-    text-transform: uppercase; padding: 5px 14px; border-radius: 20px; margin-bottom: 20px;
-  }
-  #nsPill.waiting { background: rgba(90,106,136,0.15); border-color: rgba(90,106,136,0.25); color: var(--muted); }
-  #pulseDot { width: 7px; height: 7px; border-radius: 50%; background: var(--green); animation: dotpulse 1.8s ease-in-out infinite; }
-  #nsPill.waiting #pulseDot { background: var(--muted); animation: none; }
-  @keyframes dotpulse { 0%,100%{opacity:1;transform:scale(1);} 50%{opacity:.3;transform:scale(1.6);} }
+#bookBtn{
+  width:100%;padding:14px;margin-top:16px;border-radius:8px;
+  border:none;color:white;font-size:15px;font-weight:600;
+  background:#aaa;cursor:not-allowed;
+}
+#bookBtn.ready  {background:#28a745;cursor:pointer;}
+#bookBtn.chk    {background:#f0a500;}
+#bookBtn.dup    {background:#dc3545;}
+#bookBtn.noslot {background:#dc3545;}
+#bookBtn.booking{background:#f0a500;}
+#bookBtn.booked {background:#28a745;}
 
-  /* Big token number */
-  #tokenNum {
-    font-family: 'Barlow Condensed', sans-serif;
-    font-size: clamp(70px, 14vw, 200px);
-    font-weight: 800; line-height: 0.95; color: white;
-    text-shadow: 0 0 80px var(--blue-glow), 0 0 160px var(--blue-glow);
-    letter-spacing: -2px;
-  }
-  #tokenNum.none { font-size: clamp(24px, 4vw, 52px); color: var(--muted); text-shadow: none; letter-spacing: 0; font-weight: 300; }
-  @keyframes tokenPop { 0%{transform:scale(0.85);opacity:0;} 60%{transform:scale(1.04);} 100%{transform:scale(1);opacity:1;} }
-  #tokenNum.pop { animation: tokenPop .45s cubic-bezier(.34,1.56,.64,1) forwards; }
+#statusMsg{
+  margin-top:10px;text-align:center;font-size:14px;
+  font-weight:600;min-height:18px;padding:4px;
+}
+#statusMsg.success{color:#28a745;}
+#statusMsg.err    {color:#dc3545;}
+#statusMsg.warn   {color:#e67e22;}
 
-  /* Promo panel (below token) */
-  #promoPanel {
-    display: none;
-    flex-direction: row; align-items: center; gap: 16px;
-    margin-top: 28px; padding: 16px 22px;
-    border: 1px solid var(--border); border-radius: 14px;
-    background: rgba(13,21,38,0.85); backdrop-filter: blur(8px);
-    max-width: clamp(240px, 32vw, 480px);
-  }
-  #promoText { font-size: clamp(11px, 1.1vw, 15px); color: var(--text); line-height: 1.6; font-weight: 500; flex: 1; text-align: left; }
-  #promoImg  { width: clamp(64px, 6.5vw, 100px); height: clamp(64px, 6.5vw, 100px); object-fit: contain; border-radius: 8px; background: white; padding: 5px; flex-shrink: 0; }
+#downloadBtn{
+  display:none;width:100%;padding:11px;margin-top:8px;
+  border-radius:8px;border:2px solid #007bff;background:white;
+  color:#007bff;font-size:14px;font-weight:600;cursor:pointer;
+  box-sizing:border-box;
+}
 
-  /* ── RIGHT PANEL (media) ──────────────────────────────────── */
-  #rightPanel {
-    display: none;                /* shown by JS when TVRightScreen row has content */
-    flex: 1;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    gap: 20px;
-    padding: 30px 40px;
-    position: relative; z-index: 1;
-    overflow: hidden;
-  }
-  #rightText {
-    font-size: clamp(14px, 1.5vw, 22px);
-    font-weight: 500; color: var(--text); line-height: 1.65;
-    text-align: center; max-width: 90%;
-  }
-  /* Image and GIF share same style */
-  .right-media-img {
-    max-width: 88%; max-height: 45vh;
-    border-radius: 12px; object-fit: contain;
-  }
-  /* Video iframe */
-  #rightVideo {
-    width: 100%; max-width: 640px;
-    aspect-ratio: 16/9;
-    border: none; border-radius: 12px;
-    background: #000;
-  }
-
-  /* ── STATUS BAR ───────────────────────────────────────────── */
-  #statusBar {
-    display: none;
-    align-items: center; justify-content: space-between;
-    padding: 12px 40px; border-top: 1px solid var(--border);
-    background: var(--bg2); flex-shrink: 0;
-  }
-  #statusBarText { font-size: clamp(11px, 1.1vw, 14px); color: var(--muted); }
-  #refreshInfo   { font-size: clamp(11px, 1.1vw, 13px); color: var(--muted); letter-spacing: 0.3px; }
-  #countdown     { display: inline-block; color: var(--blue); font-weight: 600; min-width: 22px; }
-
-  /* ── CLICK TO START OVERLAY ───────────────────────────────── */
-  /* Shown on first load so user provides the gesture browsers   */
-  /* require before allowing unmuted autoplay.                   */
-  #startOverlay {
-    position: fixed; inset: 0; z-index: 9999;
-    background: rgba(8,13,26,0.92);
-    display: flex; flex-direction: column;
-    align-items: center; justify-content: center;
-    gap: 20px; cursor: pointer;
-  }
-  #startOverlay .so-icon {
-    width: 80px; height: 80px; border-radius: 50%;
-    background: var(--blue);
-    display: flex; align-items: center; justify-content: center;
-    font-size: 36px;
-    box-shadow: 0 0 40px var(--blue-glow);
-    animation: sopulse 2s ease-in-out infinite;
-  }
-  @keyframes soplus { 0%,100%{box-shadow:0 0 40px var(--blue-glow);} 50%{box-shadow:0 0 70px var(--blue-glow);} }
-  #startOverlay .so-text {
-    font-family: 'Barlow Condensed', sans-serif;
-    font-size: 28px; font-weight: 600; letter-spacing: 2px;
-    text-transform: uppercase; color: white;
-  }
-  #startOverlay .so-sub {
-    font-size: 14px; color: var(--muted);
-  }
+.hiddenInput{
+  opacity:0;position:fixed;top:-9999px;left:-9999px;
+  height:1px;width:1px;pointer-events:none;
+}
 </style>
 </head>
 <body>
 
-<!-- Overlay always shown on page load to capture gesture upfront -->
-<div id="startOverlay">
-  <div class="so-icon">▶</div>
-  <div class="so-text">Tap to Start Display</div>
-  <div class="so-sub">Required once to enable audio</div>
+<div id="preloader">
+  <p>
+    नित्यमध्मान तां तांस्तु व्याधिभिश्च विवर्जितः।<br>
+    रसैश्च दन्तमूलानां रूक्षैराचाम्य विक्रियाम्॥
+  </p>
 </div>
 
-<div id="fsBar">▶ Click anywhere here to go Full Screen</div>
+<div class="header" id="headerBar">
+  Smile Dental Hospital
+  <span id="headerAddress"></span>
+</div>
+<input type="password" id="adminInput" class="hiddenInput" autocomplete="off">
 
-<div id="app">
+<div class="container">
 
-  <div id="topBar">
-    <div id="hospitalName">Loading<span>…</span></div>
-    <div id="clock">--:--:--</div>
+  <!-- ── NOW SERVING (hidden until "in" is found for today) ── -->
+  <div id="nowServingCard">
+    <div class="ns-header">
+      <span id="liveDot"></span>
+      <span class="ns-label">Now Serving</span>
+    </div>
+    <div class="ns-token" id="nsToken">—</div>
+    <div class="ns-sub"   id="nsSub"></div>
+    <span class="ns-refresh" id="nsRefresh"></span>
   </div>
 
-  <div id="selectorStrip">
-    <span class="sel-label">Doctor</span>
-    <div id="doctorBtns" style="display:flex;gap:8px;flex-wrap:wrap;"></div>
-    <div class="sel-divider"></div>
-    <span class="sel-label">Clinic</span>
-    <div id="clinicBtns" style="display:flex;gap:8px;flex-wrap:wrap;"></div>
-  </div>
+  <!-- ── BOOKING FORM ─────────────────────────────────────── -->
+  <div class="card">
 
-  <div id="display">
-
-    <!-- LEFT: token + promo -->
-    <div id="leftPanel" class="full">
-      <div id="tokenCard">
-        <div id="nsPill" class="waiting">
-          <span id="pulseDot"></span>
-          <span id="pillText">Waiting</span>
-        </div>
-        <div id="tokenNum" class="none">—</div>
-        <!-- Promo: text + QR image below token -->
-        <div id="promoPanel">
-          <div id="promoText"></div>
-          <img id="promoImg" alt="QR Code" style="display:none;">
-        </div>
-      </div>
+    <label>Doctor</label>
+    <div class="doctorSection">
+      <div class="doctorButtons" id="doctorButtons"></div>
+      <img id="doctorImage" alt="Doctor">
     </div>
 
-    <!-- RIGHT: media panel (text / image / gif / video) -->
-    <div id="rightPanel">
-      <div id="rightText"   style="display:none;"></div>
-      <img id="rightImg"    class="right-media-img" alt="" style="display:none;">
-      <img id="rightGif"    class="right-media-img" alt="" style="display:none;">
-      <iframe id="rightVideo" allowfullscreen allow="autoplay; fullscreen; encrypted-media; picture-in-picture" style="display:none;"></iframe>
-    </div>
+    <label>Clinic</label>
+    <div class="clinicButtons" id="clinicButtons"></div>
+
+    <label>Name</label>
+    <input id="userName" type="text" placeholder="Full Name">
+
+    <label>Phone</label>
+    <input id="userPhone" type="tel" placeholder="10-digit Mobile Number"
+           maxlength="10" inputmode="numeric">
+    <div class="phone-hint" id="phoneHint">Enter 10-digit number</div>
+
+    <label>Address</label>
+    <input id="userAddress" type="text" placeholder="Your Address">
+
+    <label>Date</label>
+    <select id="dateSelect"></select>
+
+    <div class="tokenInfo avail" id="tokenDiv">Token Available: —</div>
+
+    <button id="bookBtn" type="button" disabled>Book Appointment</button>
+    <div id="statusMsg"></div>
+    <button id="downloadBtn" type="button">⬇ Download Booking Receipt</button>
 
   </div>
-
-  <div id="statusBar">
-    <div id="statusBarText"></div>
-    <div id="refreshInfo">Refreshes in <span id="countdown">20</span>s</div>
-  </div>
-
 </div>
 
 <script>
-// ── PASTE YOUR WEB APP URL HERE ─────────────────────────────────
-const SCRIPT_URL = "https://script.google.com/macros/s/AKfycby6hVR6u3QCODIrQ8lRybb4AusvejbUxaLPLs4rt8LiQs1YJKVvQ4LqvlwKTBshH-VjOA/exec";
+// ── WEB APP URL ─────────────────────────────────────────────────
+const scriptURL = "https://script.google.com/macros/s/AKfycby6hVR6u3QCODIrQ8lRybb4AusvejbUxaLPLs4rt8LiQs1YJKVvQ4LqvlwKTBshH-VjOA/exec";
 // ────────────────────────────────────────────────────────────────
 
-let settingsData   = [];
-let selectedDoctor = "";
-let selectedClinic = "";
-let refreshTimer   = null;
-let cdTimer        = null;
-let countdown      = 20;
-let lastToken      = null;
+let settingsData          = [];
+let selectedDoctor        = "";
+let selectedClinic        = "";
+let selectedClinicAddress = "";
+let adminPassword         = "";
+let slotLimits            = {};
+let doctorBlockedDays     = {}; // key: doctor name → Set of blocked weekday names (lowercase)
+let clinicBlockedDays     = {}; // key: clinic name  → Set of blocked weekday names (lowercase)
+let bookingState          = "idle";
+let checkTimer            = null;
+let nsTimer               = null;
+let slotsAvailable        = true;
+let lastBooking           = null;
 
-function todayStr() {
-  const d = new Date();
-  return String(d.getDate()).padStart(2,"0") + "-" + String(d.getMonth()+1).padStart(2,"0") + "-" + d.getFullYear();
-}
+const $doctor   = document.getElementById("doctorButtons");
+const $clinic   = document.getElementById("clinicButtons");
+const $img      = document.getElementById("doctorImage");
+const $name     = document.getElementById("userName");
+const $phone    = document.getElementById("userPhone");
+const $address  = document.getElementById("userAddress");
+const $date     = document.getElementById("dateSelect");
+const $token    = document.getElementById("tokenDiv");
+const $btn      = document.getElementById("bookBtn");
+const $hdr      = document.getElementById("headerAddress");
+const $adm      = document.getElementById("adminInput");
+const $status   = document.getElementById("statusMsg");
+const $hint     = document.getElementById("phoneHint");
+const $dlBtn    = document.getElementById("downloadBtn");
+const $nsCard   = document.getElementById("nowServingCard");
+const $nsToken  = document.getElementById("nsToken");
+const $nsSub    = document.getElementById("nsSub");
+const $nsRef    = document.getElementById("nsRefresh");
 
-// ── FULLSCREEN ─────────────────────────────────────────────────
-document.getElementById("fsBar").addEventListener("click", () => {
-  const el = document.documentElement;
-  if      (el.requestFullscreen)       el.requestFullscreen();
-  else if (el.webkitRequestFullscreen) el.webkitRequestFullscreen();
-  else if (el.mozRequestFullScreen)    el.mozRequestFullScreen();
-  else if (el.msRequestFullscreen)     el.msRequestFullscreen();
+// ── INIT ─────────────────────────────────────────────────────────
+window.addEventListener("load", () => {
+  setTimeout(() => { document.getElementById("preloader").style.display = "none"; }, 5000);
+  loadSettings();
 });
 
-// ── CLOCK ──────────────────────────────────────────────────────
-function tickClock() {
-  document.getElementById("clock").textContent =
-    new Date().toLocaleTimeString("en-IN", { hour:"2-digit", minute:"2-digit", second:"2-digit", hour12:true });
-}
-setInterval(tickClock, 1000);
-tickClock();
-
-// ── GOOGLE PHOTOS URL FIX ──────────────────────────────────────
-// Google Photos sharing URLs can't be hotlinked directly.
-// This converts lh3.googleusercontent.com URLs to direct-usable form.
-// For photos.app.goo.gl short links, the user must get the direct
-// lh3.googleusercontent.com URL (open photo → share → copy link → paste in browser → copy final URL).
-function fixImageUrl(url) {
-  if (!url) return "";
-  url = url.trim();
-  // lh3.googleusercontent.com — append =s0 to get original size if no size param
-  if (url.includes("lh3.googleusercontent.com") && !url.includes("=s") && !url.includes("=w")) {
-    return url + "=s600";
-  }
-  // Google Drive file — convert to direct thumbnail
-  const driveMatch = url.match(/drive\.google\.com\/file\/d\/([^/]+)/);
-  if (driveMatch) {
-    return "https://drive.google.com/thumbnail?id=" + driveMatch[1] + "&sz=w600";
-  }
-  return url;
-}
-
-// ── YOUTUBE URL → EMBED ────────────────────────────────────────
-// Parameters explained:
-//   autoplay=1        — start playing immediately
-//   mute=0            — unmuted (requires prior user gesture; handled by overlay)
-//   rel=0             — no related videos at end
-//   modestbranding=1  — hides YouTube logo
-//   controls=0        — hides player controls
-//   iv_load_policy=3  — hides video annotations
-//   loop=1            — loops the video
-//   playlist=ID       — required for loop to work on a single video
-//   playsinline=1     — play inside the iframe, not fullscreen
-//   enablejsapi=1     — allows postMessage unmute after gesture
-function toYouTubeEmbed(url) {
-  if (!url) return "";
-  url = url.trim();
-  let videoId = "";
-  if (url.includes("youtube.com/embed/")) {
-    const m = url.match(/embed\/([^?&]+)/);
-    videoId = m ? m[1] : "";
-  } else {
-    let m = url.match(/youtu\.be\/([^?&]+)/);
-    if (m) videoId = m[1];
-    else {
-      m = url.match(/[?&]v=([^&]+)/);
-      if (m) videoId = m[1];
-    }
-  }
-  if (!videoId) return url;
-  return "https://www.youtube.com/embed/" + videoId +
-    "?autoplay=1&mute=0&rel=0&modestbranding=1&controls=0" +
-    "&iv_load_policy=3&loop=1&playlist=" + videoId +
-    "&playsinline=1&enablejsapi=1";
-}
-
-// ── LOAD SETTINGS ──────────────────────────────────────────────
 async function loadSettings() {
   try {
-    const r = await fetch(SCRIPT_URL + "?action=getSettings");
+    const r = await fetch(scriptURL + "?action=getSettings");
     settingsData = await r.json();
-
-    // Hospital name
-    const hRow = settingsData.find(r => r[0] === "Header");
-    const name = (hRow && hRow[1]) ? String(hRow[1]).trim() : "Smile Dental Hospital";
-    const words = name.split(" "), last = words.pop();
-    document.getElementById("hospitalName").innerHTML = words.join(" ") + " <span>" + last + "</span>";
-    document.title = "Now Serving — " + name;
-
-    // Status bar (TVStatusBar → Name column)
-    const sbRow  = settingsData.find(r => r[0] === "TVStatusBar");
-    const sbText = sbRow ? String(sbRow[1] || "").trim() : "";
-    if (sbText) {
-      document.getElementById("statusBarText").textContent = sbText;
-      document.getElementById("statusBar").style.display  = "flex";
-    }
-
-    // Left screen promo (TVLeftScreen → Name=text, Extra1=image url)
-    const pRow     = settingsData.find(r => r[0] === "TVLeftScreen");
-    const pText    = pRow ? String(pRow[1] || "").trim() : "";
-    const pImgRaw  = pRow ? String(pRow[2] || "").trim() : "";
-    if (pText) {
-      document.getElementById("promoText").textContent    = pText;
-      document.getElementById("promoPanel").style.display = "flex";
-      if (pImgRaw) {
-        const img = document.getElementById("promoImg");
-        img.src           = fixImageUrl(pImgRaw);
-        img.style.display = "block";
+    settingsData.forEach(row => {
+      if (row[0] === "AdminPassword") adminPassword = String(row[1]);
+      if (row[0] === "SlotLimit")
+        slotLimits[row[1].trim() + "||" + row[2].trim()] = Number(row[3]) || 0;
+      if (row[0] === "Header" && row[1])
+        document.getElementById("headerBar").childNodes[0].textContent = String(row[1]).trim() + " ";
+      // Extra2 column (index 3) = comma-separated blocked weekdays e.g. "saturday,sunday"
+      if (row[0] === "Doctor" && row[3]) {
+        const days = String(row[3]).toLowerCase().split(",").map(d => d.trim()).filter(Boolean);
+        if (days.length) doctorBlockedDays[String(row[1]).trim()] = new Set(days);
       }
-    }
-
-    // Right panel (TVRightScreen → Name=text, Extra1=image, Extra2=gif, Qualification=video)
-    // Settings columns: [0]=Type [1]=Name [2]=Extra1 [3]=Extra2 [4]=Qualification
-    const rRow   = settingsData.find(r => r[0] === "TVRightScreen");
-    const rText  = rRow ? String(rRow[1] || "").trim() : "";
-    const rImg   = rRow ? String(rRow[2] || "").trim() : "";
-    const rGif   = rRow ? String(rRow[3] || "").trim() : "";
-    const rVideo = rRow ? String(rRow[4] || "").trim() : "";
-
-    const hasRight = rText || rImg || rGif || rVideo;
-    if (hasRight) {
-      const rightPanel = document.getElementById("rightPanel");
-      rightPanel.style.display = "flex";
-      // Remove "full" class from left panel so border shows
-      document.getElementById("leftPanel").classList.remove("full");
-
-      if (rText) {
-        const el = document.getElementById("rightText");
-        el.textContent    = rText;
-        el.style.display  = "block";
+      if (row[0] === "Clinic" && row[3]) {
+        const days = String(row[3]).toLowerCase().split(",").map(d => d.trim()).filter(Boolean);
+        if (days.length) clinicBlockedDays[String(row[1]).trim()] = new Set(days);
       }
-      if (rImg) {
-        const el = document.getElementById("rightImg");
-        el.src           = fixImageUrl(rImg);
-        el.style.display = "block";
-      }
-      if (rGif) {
-        const el = document.getElementById("rightGif");
-        el.src           = fixImageUrl(rGif);
-        el.style.display = "block";
-      }
-      if (rVideo) {
-        const embedUrl = toYouTubeEmbed(rVideo);
-        if (gestureUnlocked) {
-          // Gesture already given (shouldn't happen on first load, but safe)
-          loadVideo(embedUrl);
-        } else {
-          // Show overlay and wait for tap
-          pendingVideoUrl = embedUrl;
-          document.getElementById("startOverlay").style.display = "flex";
-        }
-      }
-    }
-
-    buildDoctorButtons();
-    buildClinicButtons();
+    });
+    setupDates();
+    setupDoctors();
+    setupClinics();
   } catch(e) {
-    document.getElementById("hospitalName").textContent = "Smile Dental Hospital";
-    console.error("Settings load failed:", e);
+    setStatus("Failed to load settings. Please refresh.", "err");
   }
 }
 
-// ── DOCTOR BUTTONS ─────────────────────────────────────────────
-function buildDoctorButtons() {
-  const wrap = document.getElementById("doctorBtns");
+// ── DATES ────────────────────────────────────────────────────────
+const WEEKDAYS = ["sunday","monday","tuesday","wednesday","thursday","friday","saturday"];
+
+function isDateBlocked(d) {
+  const dayName = WEEKDAYS[d.getDay()];
+  const docBlocked = doctorBlockedDays[selectedDoctor];
+  const clinBlocked = clinicBlockedDays[selectedClinic];
+  if (docBlocked  && docBlocked.has(dayName))  return true;
+  if (clinBlocked && clinBlocked.has(dayName)) return true;
+  return false;
+}
+
+function setupDates() {
+  $date.addEventListener("change", onSelChange);
+  buildDateOptions();
+}
+
+function buildDateOptions() {
+  // Remember current value so we can restore if still valid
+  const prev = $date.value;
+  $date.innerHTML = "";
+
+  // Offer today + next 6 days, skip blocked ones
+  let added = 0;
+  for (let i = 0; i <= 6 && added < 2; i++) {
+    const d = new Date();
+    d.setDate(d.getDate() + i);
+    if (isDateBlocked(d)) continue;
+    const o = document.createElement("option");
+    o.value = o.text = dateFmt(d);
+    $date.appendChild(o);
+    added++;
+  }
+
+  // If no dates available, show a placeholder
+  if ($date.options.length === 0) {
+    const o = document.createElement("option");
+    o.value = ""; o.text = "No dates available";
+    $date.appendChild(o);
+    return;
+  }
+
+  // Restore previous selection if still present
+  const opts = Array.from($date.options).map(o => o.value);
+  if (prev && opts.includes(prev)) $date.value = prev;
+}
+
+function dateFmt(d) {
+  return String(d.getDate()).padStart(2,"0") + "-" +
+         String(d.getMonth()+1).padStart(2,"0") + "-" + d.getFullYear();
+}
+
+// ── DOCTORS ──────────────────────────────────────────────────────
+function setupDoctors() {
   settingsData.filter(r => r[0] === "Doctor").forEach((d, i) => {
     const b = document.createElement("button");
-    b.className = "sel-btn" + (i === 0 ? " active" : "");
-    b.textContent = d[1].trim();
+    b.type = "button";
+    b.innerHTML = d[1] + "<span>" + (d[4]||"") + "</span>";
     b.addEventListener("click", () => {
-      document.querySelectorAll("#doctorBtns .sel-btn").forEach(x => x.classList.remove("active"));
-      b.classList.add("active");
       selectedDoctor = d[1].trim();
-      resetAndFetch();
+      $img.src = d[2] || ""; $img.style.display = d[2] ? "block" : "none";
+      Array.from($doctor.children).forEach(x => x.classList.remove("selected"));
+      b.classList.add("selected");
+      buildDateOptions(); // rebuild dates for new doctor's blocked days
+      onSelChange();
     });
-    wrap.appendChild(b);
-    if (i === 0) selectedDoctor = d[1].trim();
+    $doctor.appendChild(b);
+    if (i === 0) b.click();
   });
 }
 
-// ── CLINIC BUTTONS ─────────────────────────────────────────────
-function buildClinicButtons() {
-  const wrap = document.getElementById("clinicBtns");
+// ── CLINICS ──────────────────────────────────────────────────────
+function setupClinics() {
   settingsData.filter(r => r[0] === "Clinic").forEach((c, i) => {
     const b = document.createElement("button");
-    b.className = "sel-btn" + (i === 0 ? " active" : "");
-    b.textContent = c[1].trim();
+    b.type = "button";
+    b.innerText = c[1];
     b.addEventListener("click", () => {
-      document.querySelectorAll("#clinicBtns .sel-btn").forEach(x => x.classList.remove("active"));
-      b.classList.add("active");
       selectedClinic = c[1].trim();
-      resetAndFetch();
+      selectedClinicAddress = (c[2] || "").trim();
+      $hdr.innerText = selectedClinicAddress;
+      Array.from($clinic.children).forEach(x => x.classList.remove("selected"));
+      b.classList.add("selected");
+      buildDateOptions(); // rebuild dates for new clinic's blocked days
+      onSelChange();
     });
-    wrap.appendChild(b);
-    if (i === 0) selectedClinic = c[1].trim();
+    $clinic.appendChild(b);
+    if (i === 0) b.click();
   });
-  resetAndFetch();
 }
 
-// ── FETCH NOW SERVING ──────────────────────────────────────────
-async function fetchNowServing() {
+// ── PHONE ────────────────────────────────────────────────────────
+$phone.addEventListener("keydown", e => {
+  const ok = ["Backspace","Delete","Tab","ArrowLeft","ArrowRight","Home","End"];
+  if (!ok.includes(e.key) && !/^\d$/.test(e.key)) e.preventDefault();
+});
+$phone.addEventListener("input", () => {
+  $phone.value = $phone.value.replace(/\D/g,"").slice(0,10);
+  const len = $phone.value.length;
+  if (len === 0) {
+    $hint.textContent = "Enter 10-digit number"; $hint.className = "phone-hint"; $phone.classList.remove("err");
+  } else if (len < 10) {
+    $hint.textContent = len + "/10 digits"; $hint.className = "phone-hint err"; $phone.classList.add("err");
+  } else {
+    $hint.textContent = "✓ Valid"; $hint.className = "phone-hint"; $phone.classList.remove("err");
+  }
+  onFormInput();
+});
+$name.addEventListener("input", onFormInput);
+$address.addEventListener("input", onFormInput);
+function phoneValid() { return /^\d{10}$/.test($phone.value); }
+
+// ── SELECTION CHANGE ─────────────────────────────────────────────
+function onSelChange() {
+  if (bookingState === "booking") return;
+  if (bookingState === "done") {
+    $token.style.display = ""; clearStatus(); $dlBtn.style.display = "none";
+  }
+  setState("idle"); clearStatus();
+  refreshNowServing();
+  refreshToken();
+  restartNsTimer();
+}
+
+// ── FORM INPUT ───────────────────────────────────────────────────
+function onFormInput() {
+  if (bookingState === "booking") return;
+  if (bookingState === "done") $token.style.display = "";
+  setState("idle");
+  scheduleCheck();
+}
+
+// ── CHECK DEBOUNCE ───────────────────────────────────────────────
+function scheduleCheck() {
+  clearTimeout(checkTimer);
+  checkTimer = setTimeout(runCheck, 400);
+}
+
+// ── DUPLICATE / SLOT CHECK ───────────────────────────────────────
+async function runCheck() {
+  if (bookingState === "booking" || bookingState === "done") return;
+  if (!slotsAvailable) { setState("full"); return; }
+
+  const name = $name.value.trim(), phone = $phone.value.trim(), address = $address.value.trim();
+  if (!name || !phoneValid() || !address) { setState("idle"); return; }
+
+  setState("checking");
   try {
     const r = await fetch(
-      SCRIPT_URL + "?action=getNowServing" +
-      "&doctor=" + encodeURIComponent(selectedDoctor) +
+      scriptURL + "?action=checkDuplicate" +
+      "&name="   + encodeURIComponent(name) +
+      "&phone="  + encodeURIComponent(phone) +
       "&clinic=" + encodeURIComponent(selectedClinic) +
-      "&date="   + encodeURIComponent(todayStr())
+      "&date="   + encodeURIComponent($date.value)
     );
     const d = await r.json();
-    renderToken(Number(d.nowServing) || 0);
-  } catch(e) { /* silent fail — keep showing last token */ }
-}
-
-// ── RENDER TOKEN ───────────────────────────────────────────────
-function renderToken(ns) {
-  const $num      = document.getElementById("tokenNum");
-  const $pill     = document.getElementById("nsPill");
-  const $pillText = document.getElementById("pillText");
-
-  if (ns > 0) {
-    if (ns !== lastToken) {
-      $num.className = "";
-      void $num.offsetWidth;
-      $num.className = "pop";
+    if (!slotsAvailable) { setState("full"); return; }
+    if (d.duplicate) {
+      setState("duplicate");
+      setStatus("An appointment already exists for this name & phone at this clinic on the selected date.", "warn");
+    } else {
+      setState("ready"); clearStatus();
     }
-    $num.textContent      = "Token: " + ns;
-    $pill.className       = "";
-    $pillText.textContent = "Now Serving";
-    lastToken = ns;
-  } else {
-    $num.className        = "none";
-    $num.textContent      = "—";
-    $pill.className       = "waiting";
-    $pillText.textContent = "Waiting";
-    lastToken = null;
+  } catch(e) {
+    setState("idle");
+    setStatus("Could not verify. Please wait and try again.", "warn");
   }
 }
 
-// ── COUNTDOWN + REFRESH ────────────────────────────────────────
-function resetAndFetch() {
-  clearInterval(refreshTimer);
-  clearInterval(cdTimer);
-  countdown = 20;
-  const $cd = document.getElementById("countdown");
-  if ($cd) $cd.textContent = countdown;
-
-  fetchNowServing();
-
-  cdTimer = setInterval(() => {
-    countdown--;
-    if ($cd) $cd.textContent = countdown;
-    if (countdown <= 0) countdown = 20;
-  }, 1000);
-
-  refreshTimer = setInterval(() => { countdown = 20; fetchNowServing(); }, 20000);
+// ── TOKEN REFRESH ─────────────────────────────────────────────────
+async function refreshToken() {
+  if (!selectedDoctor || !selectedClinic) return;
+  $token.textContent = "Checking availability…";
+  $token.className   = "tokenInfo avail";
+  $token.style.display = "";
+  try {
+    const r = await fetch(
+      scriptURL + "?action=getToken" +
+      "&doctor=" + encodeURIComponent(selectedDoctor) +
+      "&clinic=" + encodeURIComponent(selectedClinic) +
+      "&date="   + encodeURIComponent($date.value)
+    );
+    const d = await r.json();
+    const maxTok = Number(d.maxToken) || 0;
+    const limit  = slotLimits[selectedDoctor + "||" + selectedClinic] || 0;
+    if (limit > 0 && maxTok >= limit) {
+      slotsAvailable = false;
+      $token.textContent = "No Booking Available"; $token.className = "tokenInfo full";
+      setState("full");
+      setStatus("All slots are full for this doctor, clinic & date.", "err");
+    } else {
+      slotsAvailable = true;
+      $token.textContent = "Token Available: " + (maxTok + 1);
+      $token.className   = "tokenInfo avail";
+      if (bookingState === "full") { setState("idle"); clearStatus(); }
+    }
+  } catch(e) {
+    slotsAvailable = true; $token.textContent = "Token: —";
+  }
+  scheduleCheck();
 }
 
-// ── GESTURE UNLOCK + OVERLAY ───────────────────────────────────
-// gestureUnlocked = true after user taps overlay once.
-// Overlay is hidden by default — only shown when a video URL exists.
-let pendingVideoUrl = "";
-let currentVideoUrl = "";   // tracks what is currently loaded
-let gestureUnlocked = false;
+// ── NOW SERVING ───────────────────────────────────────────────────
+// Shows the card ONLY when nowServing > 0 (i.e. "in" is marked today).
+// Hides card completely when nothing is marked "in".
+async function refreshNowServing() {
+  if (!selectedDoctor || !selectedClinic) return;
+  try {
+    const r = await fetch(
+      scriptURL + "?action=getNowServing" +
+      "&doctor=" + encodeURIComponent(selectedDoctor) +
+      "&clinic=" + encodeURIComponent(selectedClinic) +
+      "&date="   + encodeURIComponent($date.value)
+    );
+    const d  = await r.json();
+    const ns = Number(d.nowServing) || 0;
 
-document.getElementById("startOverlay").addEventListener("click", () => {
-  gestureUnlocked = true;
-  document.getElementById("startOverlay").style.display = "none";
-  if (pendingVideoUrl) {
-    loadVideo(pendingVideoUrl);
-    pendingVideoUrl = "";
+    if (ns > 0) {
+      // Show the card
+      $nsCard.style.display  = "block";
+      $nsToken.textContent   = "Token: " + ns;
+      $nsSub.textContent     = "";
+    } else {
+      // No "in" marked today — hide the card entirely
+      $nsCard.style.display = "none";
+    }
+
+    // Refresh timestamp (shown when card is visible, harmless when hidden)
+    const t = new Date();
+    $nsRef.textContent = "Updated " +
+      t.toLocaleTimeString("en-IN", { hour:"2-digit", minute:"2-digit", second:"2-digit" });
+
+  } catch(e) {
+    // On error just hide the card — don't show broken state to patients
+    $nsCard.style.display = "none";
+  }
+}
+
+// Auto-refresh Now Serving every 20 seconds
+function restartNsTimer() {
+  clearInterval(nsTimer);
+  nsTimer = setInterval(refreshNowServing, 20000);
+}
+
+// ── BOOK ─────────────────────────────────────────────────────────
+$btn.addEventListener("click", async () => {
+  if (bookingState !== "ready") return;
+  setState("booking");
+  const params = new URLSearchParams();
+  params.append("name",    $name.value.trim());
+  params.append("phone",   $phone.value.trim());
+  params.append("doctor",  selectedDoctor);
+  params.append("clinic",  selectedClinic);
+  params.append("address", $address.value.trim());
+  params.append("date",    $date.value);
+  try {
+    const r = await fetch(scriptURL, { method: "POST", body: params });
+    const d = await r.json();
+    if (d.status === "success") {
+      lastBooking = {
+        hospital:"Smile Dental Hospital", clinic:selectedClinic,
+        clinicAddress:selectedClinicAddress, doctor:selectedDoctor,
+        name:$name.value.trim(), phone:$phone.value.trim(),
+        address:$address.value.trim(), date:$date.value,
+        token:d.token, timestamp:new Date().toLocaleString("en-IN")
+      };
+      setState("done");
+      $token.style.display = "none";
+      setStatus("✓ Appointment booked! Token: " + d.token, "success");
+      $dlBtn.style.display = "block";
+    } else if (d.status === "duplicate") {
+      setState("duplicate");
+      setStatus("Duplicate — already booked for this name & phone at this clinic on this date.", "warn");
+    } else if (d.status === "full") {
+      slotsAvailable = false;
+      $token.textContent = "No Booking Available"; $token.className = "tokenInfo full";
+      setState("full");
+      setStatus("All slots are full for this doctor, clinic & date.", "err");
+    } else {
+      setState("idle"); setStatus("Server error. Please try again.", "err");
+    }
+  } catch(e) {
+    setState("idle"); setStatus("Network error. Please check your connection.", "err");
   }
 });
 
-function loadVideo(embedUrl) {
-  const iframe = document.getElementById("rightVideo");
-  iframe.src           = embedUrl;
-  iframe.style.display = "block";
-  currentVideoUrl      = embedUrl;
-}
+// ── DOWNLOAD RECEIPT ──────────────────────────────────────────────
+$dlBtn.addEventListener("click", async () => { if (lastBooking) await buildReceipt(lastBooking); });
 
-// ── RIGHT PANEL POLLING (every 30s) ────────────────────────────
-// Re-fetches the full TVRightScreen row every 30 seconds.
-// Adds or removes the right panel and each element within it
-// dynamically — no page refresh needed.
-
-async function pollRightPanel() {
+async function buildReceipt(b) {
+  const SCALE=2, W=160, TH=10, PAD=8;
+  let qrDataURL = null;
   try {
-    const r    = await fetch(SCRIPT_URL + "?action=getSettings&_t=" + Date.now());
-    const data = await r.json();
-
-    const rRow   = data.find(r => r[0] === "TVRightScreen");
-    const rText  = rRow ? String(rRow[1] || "").trim() : "";
-    const rImg   = rRow ? String(rRow[2] || "").trim() : "";
-    const rGif   = rRow ? String(rRow[3] || "").trim() : "";
-    const rVideo = rRow ? String(rRow[4] || "").trim() : "";
-    const hasAny = rText || rImg || rGif || rVideo;
-
-    const rightPanel = document.getElementById("rightPanel");
-    const leftPanel  = document.getElementById("leftPanel");
-
-    // ── PANEL VISIBILITY ────────────────────────────────────────
-    if (hasAny) {
-      rightPanel.style.display = "flex";
-      leftPanel.classList.remove("full");
-    } else {
-      rightPanel.style.display = "none";
-      leftPanel.classList.add("full");
-    }
-
-    // ── TEXT ────────────────────────────────────────────────────
-    const $rt = document.getElementById("rightText");
-    if (rText) { $rt.textContent = rText; $rt.style.display = "block"; }
-    else        { $rt.textContent = "";    $rt.style.display = "none";  }
-
-    // ── IMAGE ───────────────────────────────────────────────────
-    const $ri = document.getElementById("rightImg");
-    if (rImg) { $ri.src = fixImageUrl(rImg); $ri.style.display = "block"; }
-    else      { $ri.src = "";                $ri.style.display = "none";  }
-
-    // ── GIF ─────────────────────────────────────────────────────
-    const $rg = document.getElementById("rightGif");
-    if (rGif) { $rg.src = fixImageUrl(rGif); $rg.style.display = "block"; }
-    else      { $rg.src = "";                 $rg.style.display = "none";  }
-
-    // ── VIDEO ───────────────────────────────────────────────────
-    const embedUrl = rVideo ? toYouTubeEmbed(rVideo) : "";
-
-    if (embedUrl !== currentVideoUrl) {
-      const iframe = document.getElementById("rightVideo");
-      if (!embedUrl) {
-        // Video removed
-        iframe.src = ""; iframe.style.display = "none";
-        currentVideoUrl = "";
-      } else if (gestureUnlocked) {
-        // Small delay ensures the panel is rendered before YouTube autoplay fires
-        setTimeout(() => loadVideo(embedUrl), 150);
-      } else {
-        // Gesture not yet given — this shouldn't happen since overlay
-        // always shows at launch, but handle it safely just in case
-        pendingVideoUrl = embedUrl;
-        document.getElementById("startOverlay").style.display = "flex";
-      }
-    }
-
-  } catch(e) { /* silent — keep current state */ }
+    qrDataURL = await QRCode.toDataURL(
+      "T:"+b.token+" "+b.name+" "+b.doctor+" "+b.clinic+" "+b.date,
+      { width:64, margin:1, color:{ dark:"#000000", light:"#00000000" } }
+    );
+  } catch(e) {}
+  const lines = buildLines(b);
+  let H = TH + 4;
+  for (const l of lines) H += measureH(l);
+  if (qrDataURL) H += 52;
+  H += TH + 4;
+  const canvas = document.createElement("canvas");
+  canvas.width = W*SCALE; canvas.height = H*SCALE;
+  const ctx = canvas.getContext("2d");
+  ctx.scale(SCALE, SCALE);
+  // Zigzag clip
+  const tW=7, nT=Math.floor(W/tW), tS=(W-nT*tW)/2;
+  ctx.beginPath(); ctx.moveTo(0,TH);
+  for(let i=0;i<nT;i++){const x=tS+i*tW;ctx.lineTo(x+tW/2,0);ctx.lineTo(x+tW,TH);}
+  ctx.lineTo(W,TH);ctx.lineTo(W,H-TH);
+  for(let i=nT;i>0;i--){const x=tS+i*tW;ctx.lineTo(x-tW/2,H);ctx.lineTo(x-tW,H-TH);}
+  ctx.lineTo(0,H-TH); ctx.closePath(); ctx.clip();
+  ctx.fillStyle="#fefdf5"; ctx.fillRect(0,0,W,H);
+  for(let y=TH;y<H-TH;y+=3){ctx.fillStyle="rgba(0,0,0,0.006)";ctx.fillRect(0,y,W,1);}
+  let y=TH+4; for(const l of lines) y=drawLine(ctx,l,y,W,PAD);
+  if (qrDataURL) {
+    const qs=46,qx=(W-qs)/2,qi=new Image();
+    await new Promise(res=>{qi.onload=res;qi.src=qrDataURL;});
+    ctx.fillStyle="#fff"; ctx.fillRect(qx-2,y-1,qs+4,qs+4);
+    ctx.drawImage(qi,qx,y,qs,qs);
+  }
+  const a=document.createElement("a");
+  a.download="Receipt_T"+b.token+"_"+b.date+".png";
+  a.href=canvas.toDataURL("image/png"); a.click();
+}
+function buildLines(b){
+  const L=[],g=h=>L.push({t:"gap",h}),d=()=>L.push({t:"dash"}),
+    c=(txt,sz,bold,col)=>L.push({t:"c",txt,sz:sz||8,bold:!!bold,col:col||"#222"}),
+    row=(lbl,val)=>L.push({t:"row",lbl,val});
+  g(3); c("SMILE DENTAL HOSPITAL",10,true,"#000"); g(2);
+  c(b.clinic,7.5,false,"#444"); c(b.clinicAddress,7,false,"#777");
+  g(4); d(); g(4); c("APPOINTMENT RECEIPT",8,true,"#333");
+  g(5); c("TOKEN NO.",7,false,"#888"); g(1); c("#"+b.token,28,true,"#000");
+  g(6); d(); g(5);
+  row("DOCTOR",b.doctor);   g(2); row("PATIENT",b.name);    g(2);
+  row("PHONE",b.phone);     g(2); row("ADDRESS",b.address); g(2);
+  row("APPT DATE",b.date);  g(2); row("BOOKED AT",b.timestamp);
+  g(5); d(); g(4); c("** APPOINTMENT CONFIRMED **",7,true,"#000"); g(2);
+  c("Carry this to your appointment",6.5,false,"#888"); g(6);
+  return L;
+}
+function measureH(l){
+  if(l.t==="gap") return l.h||4; if(l.t==="dash") return 8;
+  if(l.t==="c")   return(l.sz||8)*1.55; if(l.t==="row") return 20; return 8;
+}
+function drawLine(ctx,l,y,W,PAD){
+  ctx.textBaseline="top";
+  if(l.t==="gap") return y+(l.h||4);
+  if(l.t==="dash"){
+    ctx.font="6px monospace";ctx.fillStyle="#ccc";ctx.textAlign="center";
+    ctx.fillText("- - - - - - - - - - - - - - - - - - - - - -",W/2,y);return y+8;
+  }
+  if(l.t==="c"){
+    ctx.font=(l.bold?"bold ":"")+l.sz+"px 'Courier New',monospace";
+    ctx.fillStyle=l.col;ctx.textAlign="center";
+    const words=String(l.txt).split(" ");let ln="",ly=y,lh=l.sz*1.25;
+    for(const w of words){const t=ln?ln+" "+w:w;
+      if(ctx.measureText(t).width>W-PAD*2&&ln){ctx.fillText(ln,W/2,ly);ln=w;ly+=lh;}else ln=t;}
+    ctx.fillText(ln,W/2,ly);return ly+l.sz*1.55;
+  }
+  if(l.t==="row"){
+    const vx=PAD+46,vmw=W-PAD-vx;
+    ctx.font="bold 6.5px 'Courier New',monospace";ctx.fillStyle="#666";
+    ctx.textAlign="left";ctx.fillText(l.lbl,PAD,y);
+    ctx.font="6.5px 'Courier New',monospace";ctx.fillStyle="#111";
+    const words=String(l.val||"").split(" ");let ln="",ly=y;
+    for(const w of words){const t=ln?ln+" "+w:w;
+      if(ctx.measureText(t).width>vmw&&ln){ctx.textAlign="right";ctx.fillText(ln,W-PAD,ly);ln=w;ly+=9;}else ln=t;}
+    ctx.textAlign="right";ctx.fillText(ln,W-PAD,ly);return Math.max(y+12,ly+9);
+  }
+  return y;
 }
 
-// ── BOOT ──────────────────────────────────────────────────────
-loadSettings();
-setInterval(pollRightPanel, 30000);
+// ── STATE MACHINE ────────────────────────────────────────────────
+function setState(s) {
+  bookingState=s; $btn.disabled=true; $btn.className="";
+  switch(s){
+    case "idle":     $btn.innerText="Book Appointment"; break;
+    case "checking": $btn.innerText="Checking…"; $btn.classList.add("chk"); break;
+    case "ready":    $btn.innerText="Book Appointment"; $btn.classList.add("ready"); $btn.disabled=false; break;
+    case "duplicate":$btn.innerText="Duplicate Appointment"; $btn.classList.add("dup"); break;
+    case "full":     $btn.innerText="No Slots Available"; $btn.classList.add("noslot"); break;
+    case "booking":  $btn.innerText="Booking…"; $btn.classList.add("booking"); break;
+    case "done":     $btn.innerText="✓ Appointment Booked"; $btn.classList.add("booked"); break;
+  }
+}
+function setStatus(m,c){$status.textContent=m;$status.className=c;}
+function clearStatus(){$status.textContent="";$status.className="";}
+
+// ── ADMIN (header tap → redirect) ────────────────────────────────
+document.getElementById("headerBar").addEventListener("click",()=>{
+  $adm.value="";$adm.style.pointerEvents="auto";$adm.focus();
+});
+$adm.addEventListener("input",()=>{
+  if(adminPassword&&$adm.value===adminPassword)
+    window.location.href="https://duckduckgo.com";
+});
 </script>
 </body>
 </html>
