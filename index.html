@@ -194,9 +194,44 @@
   #statusBarText { font-size: clamp(11px, 1.1vw, 14px); color: var(--muted); }
   #refreshInfo   { font-size: clamp(11px, 1.1vw, 13px); color: var(--muted); letter-spacing: 0.3px; }
   #countdown     { display: inline-block; color: var(--blue); font-weight: 600; min-width: 22px; }
+
+  /* ── CLICK TO START OVERLAY ───────────────────────────────── */
+  /* Shown on first load so user provides the gesture browsers   */
+  /* require before allowing unmuted autoplay.                   */
+  #startOverlay {
+    position: fixed; inset: 0; z-index: 9999;
+    background: rgba(8,13,26,0.92);
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    gap: 20px; cursor: pointer;
+  }
+  #startOverlay .so-icon {
+    width: 80px; height: 80px; border-radius: 50%;
+    background: var(--blue);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 36px;
+    box-shadow: 0 0 40px var(--blue-glow);
+    animation: sopulse 2s ease-in-out infinite;
+  }
+  @keyframes soplus { 0%,100%{box-shadow:0 0 40px var(--blue-glow);} 50%{box-shadow:0 0 70px var(--blue-glow);} }
+  #startOverlay .so-text {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 28px; font-weight: 600; letter-spacing: 2px;
+    text-transform: uppercase; color: white;
+  }
+  #startOverlay .so-sub {
+    font-size: 14px; color: var(--muted);
+  }
 </style>
 </head>
 <body>
+
+<!-- One-time tap overlay to unlock unmuted autoplay -->
+<div id="startOverlay">
+  <div class="so-icon">▶</div>
+  <div class="so-text">Tap to Start Display</div>
+  <div class="so-sub">Required once to enable audio</div>
+</div>
 
 <div id="fsBar">▶ Click anywhere here to go Full Screen</div>
 
@@ -306,19 +341,37 @@ function fixImageUrl(url) {
 }
 
 // ── YOUTUBE URL → EMBED ────────────────────────────────────────
+// Parameters explained:
+//   autoplay=1        — start playing immediately
+//   mute=0            — unmuted (requires prior user gesture; handled by overlay)
+//   rel=0             — no related videos at end
+//   modestbranding=1  — hides YouTube logo
+//   controls=0        — hides player controls
+//   iv_load_policy=3  — hides video annotations
+//   loop=1            — loops the video
+//   playlist=ID       — required for loop to work on a single video
+//   playsinline=1     — play inside the iframe, not fullscreen
+//   enablejsapi=1     — allows postMessage unmute after gesture
 function toYouTubeEmbed(url) {
   if (!url) return "";
   url = url.trim();
-  // Already an embed URL
-  if (url.includes("youtube.com/embed/")) return url;
-  // youtu.be/ID
-  let m = url.match(/youtu\.be\/([^?&]+)/);
-  if (m) return "https://www.youtube.com/embed/" + m[1] + "?autoplay=1&mute=1&loop=1&playlist=" + m[1];
-  // youtube.com/watch?v=ID
-  m = url.match(/[?&]v=([^&]+)/);
-  if (m) return "https://www.youtube.com/embed/" + m[1] + "?autoplay=1&mute=1&loop=1&playlist=" + m[1];
-  // Any other URL — try as-is in iframe
-  return url;
+  let videoId = "";
+  if (url.includes("youtube.com/embed/")) {
+    const m = url.match(/embed\/([^?&]+)/);
+    videoId = m ? m[1] : "";
+  } else {
+    let m = url.match(/youtu\.be\/([^?&]+)/);
+    if (m) videoId = m[1];
+    else {
+      m = url.match(/[?&]v=([^&]+)/);
+      if (m) videoId = m[1];
+    }
+  }
+  if (!videoId) return url;
+  return "https://www.youtube.com/embed/" + videoId +
+    "?autoplay=1&mute=0&rel=0&modestbranding=1&controls=0" +
+    "&iv_load_policy=3&loop=1&playlist=" + videoId +
+    "&playsinline=1&enablejsapi=1";
 }
 
 // ── LOAD SETTINGS ──────────────────────────────────────────────
@@ -387,9 +440,10 @@ async function loadSettings() {
         el.style.display = "block";
       }
       if (rVideo) {
-        const el = document.getElementById("rightVideo");
-        el.src           = toYouTubeEmbed(rVideo);
-        el.style.display = "block";
+        // Don't set src yet — wait for user gesture on the overlay.
+        // The overlay click handler will set it after the tap.
+        pendingVideoUrl = toYouTubeEmbed(rVideo);
+        // iframe stays hidden until overlay is dismissed
       }
     }
 
@@ -495,6 +549,23 @@ function resetAndFetch() {
 
   refreshTimer = setInterval(() => { countdown = 20; fetchNowServing(); }, 20000);
 }
+
+// ── CLICK-TO-START OVERLAY ─────────────────────────────────────
+// Browsers require a user gesture before allowing unmuted autoplay.
+// We show a fullscreen overlay on first load; tapping it provides
+// the gesture, dismisses the overlay, then sets the video src so
+// it starts playing unmuted from the very first frame.
+let pendingVideoUrl = "";   // stores embed URL until user taps
+
+document.getElementById("startOverlay").addEventListener("click", () => {
+  document.getElementById("startOverlay").style.display = "none";
+  // Now that we have a gesture, set the iframe src if a video is waiting
+  if (pendingVideoUrl) {
+    const iframe = document.getElementById("rightVideo");
+    iframe.src           = pendingVideoUrl;
+    iframe.style.display = "block";
+  }
+});
 
 loadSettings();
 </script>
