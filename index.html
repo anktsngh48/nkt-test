@@ -1,0 +1,538 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Now Serving — Smile Dental Hospital</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@300;600;800&family=Barlow:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  /* ── RESET & BASE ─────────────────────────────────────────── */
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --blue:      #0072FF;
+    --blue-dark: #004FBB;
+    --blue-glow: rgba(0, 114, 255, 0.35);
+    --bg:        #080d1a;
+    --bg2:       #0d1526;
+    --border:    rgba(255,255,255,0.08);
+    --text:      #e8edf5;
+    --muted:     #5a6a88;
+    --green:     #00d084;
+  }
+
+  html, body {
+    height: 100%;
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Barlow', sans-serif;
+    overflow: hidden;
+    user-select: none;
+  }
+
+  /* ── FULLSCREEN BAR ───────────────────────────────────────── */
+  #fsBar {
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    z-index: 100;
+    background: var(--blue);
+    color: white;
+    text-align: center;
+    padding: 10px;
+    font-size: 15px;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+    cursor: pointer;
+    transition: opacity .3s;
+  }
+  #fsBar:hover { background: var(--blue-dark); }
+  /* Hidden in fullscreen */
+  :fullscreen #fsBar,
+  :-webkit-full-screen #fsBar { display: none; }
+
+  /* ── MAIN LAYOUT ──────────────────────────────────────────── */
+  #app {
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+    padding-top: 42px; /* space for fsBar */
+  }
+  :fullscreen #app,
+  :-webkit-full-screen #app { padding-top: 0; }
+
+  /* ── HEADER ───────────────────────────────────────────────── */
+  #topBar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 18px 40px;
+    border-bottom: 1px solid var(--border);
+    background: var(--bg2);
+    flex-shrink: 0;
+  }
+  #hospitalName {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: clamp(18px, 2.2vw, 30px);
+    font-weight: 800;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    color: white;
+  }
+  #hospitalName span {
+    color: var(--blue);
+  }
+  #clock {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: clamp(20px, 2.5vw, 34px);
+    font-weight: 600;
+    color: var(--muted);
+    letter-spacing: 2px;
+  }
+
+  /* ── SELECTOR STRIP ───────────────────────────────────────── */
+  #selectorStrip {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 14px 40px;
+    border-bottom: 1px solid var(--border);
+    background: var(--bg2);
+    flex-shrink: 0;
+    flex-wrap: wrap;
+  }
+  .sel-label {
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-right: 4px;
+  }
+  .sel-divider {
+    width: 1px;
+    height: 28px;
+    background: var(--border);
+    margin: 0 8px;
+  }
+  .sel-btn {
+    background: transparent;
+    border: 1px solid var(--border);
+    color: var(--muted);
+    padding: 7px 18px;
+    border-radius: 6px;
+    font-family: 'Barlow', sans-serif;
+    font-size: clamp(12px, 1.2vw, 15px);
+    font-weight: 500;
+    cursor: pointer;
+    transition: all .2s;
+    white-space: nowrap;
+  }
+  .sel-btn:hover {
+    border-color: var(--blue);
+    color: white;
+  }
+  .sel-btn.active {
+    background: var(--blue);
+    border-color: var(--blue);
+    color: white;
+  }
+
+  /* ── DISPLAY AREA ─────────────────────────────────────────── */
+  #display {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    overflow: hidden;
+  }
+
+  /* Background glow */
+  #display::before {
+    content: '';
+    position: absolute;
+    width: 60vw;
+    height: 60vw;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(0,114,255,0.07) 0%, transparent 70%);
+    pointer-events: none;
+  }
+
+  /* Subtle grid lines */
+  #display::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background-image:
+      linear-gradient(var(--border) 1px, transparent 1px),
+      linear-gradient(90deg, var(--border) 1px, transparent 1px);
+    background-size: 60px 60px;
+    pointer-events: none;
+    opacity: 0.4;
+  }
+
+  /* ── TOKEN CARD ───────────────────────────────────────────── */
+  #tokenCard {
+    position: relative;
+    z-index: 2;
+    text-align: center;
+    padding: 0 40px;
+  }
+
+  #nsLabel {
+    font-size: clamp(13px, 1.5vw, 18px);
+    font-weight: 600;
+    letter-spacing: 4px;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 16px;
+  }
+
+  /* Pill badge above label */
+  #nsPill {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: rgba(0,208,132,0.12);
+    border: 1px solid rgba(0,208,132,0.25);
+    color: var(--green);
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    padding: 5px 14px;
+    border-radius: 20px;
+    margin-bottom: 24px;
+  }
+  #nsPill.off {
+    background: rgba(90,106,136,0.15);
+    border-color: rgba(90,106,136,0.25);
+    color: var(--muted);
+  }
+  #pulseDot {
+    width: 7px; height: 7px;
+    border-radius: 50%;
+    background: var(--green);
+    animation: dotpulse 1.8s ease-in-out infinite;
+  }
+  #nsPill.off #pulseDot {
+    background: var(--muted);
+    animation: none;
+  }
+  @keyframes dotpulse {
+    0%,100% { opacity:1; transform:scale(1); }
+    50%      { opacity:.3; transform:scale(1.6); }
+  }
+
+  /* The big token number */
+  #tokenNum {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: clamp(100px, 22vw, 280px);
+    font-weight: 800;
+    line-height: 0.9;
+    color: white;
+    text-shadow:
+      0 0 80px var(--blue-glow),
+      0 0 160px var(--blue-glow);
+    letter-spacing: -4px;
+    transition: all .4s cubic-bezier(.34,1.56,.64,1);
+  }
+  #tokenNum.none {
+    font-size: clamp(30px, 5vw, 64px);
+    color: var(--muted);
+    text-shadow: none;
+    letter-spacing: 0;
+    font-weight: 300;
+  }
+
+  /* Pop animation when token changes */
+  @keyframes tokenPop {
+    0%   { transform: scale(0.85); opacity: 0; }
+    60%  { transform: scale(1.04); }
+    100% { transform: scale(1);    opacity: 1; }
+  }
+  #tokenNum.pop { animation: tokenPop .45s cubic-bezier(.34,1.56,.64,1) forwards; }
+
+  /* Sub info below token */
+  #tokenSub {
+    margin-top: 24px;
+    font-size: clamp(14px, 1.6vw, 20px);
+    font-weight: 500;
+    color: var(--muted);
+    letter-spacing: 0.5px;
+  }
+
+  /* ── BOTTOM STATUS BAR ────────────────────────────────────── */
+  #statusBar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 40px;
+    border-top: 1px solid var(--border);
+    background: var(--bg2);
+    flex-shrink: 0;
+  }
+  #clinicAddress {
+    font-size: clamp(11px, 1.1vw, 14px);
+    color: var(--muted);
+  }
+  #refreshInfo {
+    font-size: clamp(11px, 1.1vw, 13px);
+    color: var(--muted);
+    letter-spacing: 0.3px;
+  }
+  #countdown {
+    display: inline-block;
+    color: var(--blue);
+    font-weight: 600;
+    min-width: 22px;
+    text-align: right;
+  }
+</style>
+</head>
+<body>
+
+<!-- Fullscreen prompt — hidden automatically in fullscreen mode -->
+<div id="fsBar">▶ Click anywhere here to go Full Screen</div>
+
+<div id="app">
+
+  <!-- Header -->
+  <div id="topBar">
+    <div id="hospitalName">Loading<span>…</span></div>
+    <div id="clock">--:--:--</div>
+  </div>
+
+  <!-- Doctor / Clinic selector -->
+  <div id="selectorStrip">
+    <span class="sel-label">Doctor</span>
+    <div id="doctorBtns"></div>
+    <div class="sel-divider"></div>
+    <span class="sel-label">Clinic</span>
+    <div id="clinicBtns"></div>
+  </div>
+
+  <!-- Main display -->
+  <div id="display">
+    <div id="tokenCard">
+      <div id="nsPill" class="off">
+        <span id="pulseDot"></span>
+        <span id="pillText">Waiting</span>
+      </div>
+      <div id="nsLabel">NOW SERVING</div>
+      <div id="tokenNum" class="none">—</div>
+      <div id="tokenSub"></div>
+    </div>
+  </div>
+
+  <!-- Status bar -->
+  <div id="statusBar">
+    <div id="clinicAddress"></div>
+    <div id="refreshInfo">
+      Refreshes in <span id="countdown">20</span>s &nbsp;·&nbsp;
+      <span id="lastUpdated">Updating…</span>
+    </div>
+  </div>
+
+</div>
+
+<script>
+// ── REPLACE WITH YOUR WEB APP URL ──────────────────────────────
+const SCRIPT_URL = "https://script.google.com/macros/s/AKfycby6hVR6u3QCODIrQ8lRybb4AusvejbUxaLPLs4rt8LiQs1YJKVvQ4LqvlwKTBshH-VjOA/exec";
+// ────────────────────────────────────────────────────────────────
+
+let settingsData   = [];
+let selectedDoctor = "";
+let selectedClinic = "";
+let selectedClinicAddress = "";
+let refreshTimer   = null;
+let countdownTimer = null;
+let countdown      = 20;
+let lastToken      = null;
+let hospitalName   = "Smile Dental Hospital";
+
+// Today's date in DD-MM-YYYY
+function todayStr() {
+  const d = new Date();
+  return String(d.getDate()).padStart(2,"0") + "-" +
+         String(d.getMonth()+1).padStart(2,"0") + "-" + d.getFullYear();
+}
+
+// ── FULLSCREEN ────────────────────────────────────────────────
+document.getElementById("fsBar").addEventListener("click", () => {
+  const el = document.documentElement;
+  if (el.requestFullscreen)            el.requestFullscreen();
+  else if (el.webkitRequestFullscreen) el.webkitRequestFullscreen();
+  else if (el.mozRequestFullScreen)    el.mozRequestFullScreen();
+  else if (el.msRequestFullscreen)     el.msRequestFullscreen();
+});
+
+// ── CLOCK ─────────────────────────────────────────────────────
+function tickClock() {
+  document.getElementById("clock").textContent =
+    new Date().toLocaleTimeString("en-IN", {
+      hour: "2-digit", minute: "2-digit", second: "2-digit", hour12: false
+    });
+}
+setInterval(tickClock, 1000);
+tickClock();
+
+// ── LOAD SETTINGS ─────────────────────────────────────────────
+async function loadSettings() {
+  try {
+    const r = await fetch(SCRIPT_URL + "?action=getSettings");
+    settingsData = await r.json();
+
+    // Hospital name
+    const hRow = settingsData.find(r => r[0] === "Header");
+    if (hRow && hRow[1]) {
+      hospitalName = String(hRow[1]).trim();
+    }
+    // Split name for blue accent on last word
+    const words = hospitalName.split(" ");
+    const last  = words.pop();
+    document.getElementById("hospitalName").innerHTML =
+      words.join(" ") + " <span>" + last + "</span>";
+
+    buildDoctorButtons();
+    buildClinicButtons();
+  } catch(e) {
+    document.getElementById("hospitalName").textContent = hospitalName;
+    document.getElementById("tokenNum").textContent = "Error loading settings";
+  }
+}
+
+// ── DOCTOR BUTTONS ────────────────────────────────────────────
+function buildDoctorButtons() {
+  const wrap = document.getElementById("doctorBtns");
+  wrap.style.display = "flex";
+  wrap.style.gap = "8px";
+  wrap.style.flexWrap = "wrap";
+  const doctors = settingsData.filter(r => r[0] === "Doctor");
+  doctors.forEach((d, i) => {
+    const b = document.createElement("button");
+    b.className = "sel-btn" + (i === 0 ? " active" : "");
+    b.textContent = d[1].trim();
+    b.addEventListener("click", () => {
+      document.querySelectorAll("#doctorBtns .sel-btn").forEach(x => x.classList.remove("active"));
+      b.classList.add("active");
+      selectedDoctor = d[1].trim();
+      resetAndFetch();
+    });
+    wrap.appendChild(b);
+    if (i === 0) selectedDoctor = d[1].trim();
+  });
+}
+
+// ── CLINIC BUTTONS ────────────────────────────────────────────
+function buildClinicButtons() {
+  const wrap = document.getElementById("clinicBtns");
+  wrap.style.display = "flex";
+  wrap.style.gap = "8px";
+  wrap.style.flexWrap = "wrap";
+  const clinics = settingsData.filter(r => r[0] === "Clinic");
+  clinics.forEach((c, i) => {
+    const b = document.createElement("button");
+    b.className = "sel-btn" + (i === 0 ? " active" : "");
+    b.textContent = c[1].trim();
+    b.addEventListener("click", () => {
+      document.querySelectorAll("#clinicBtns .sel-btn").forEach(x => x.classList.remove("active"));
+      b.classList.add("active");
+      selectedClinic        = c[1].trim();
+      selectedClinicAddress = (c[2] || "").trim();
+      document.getElementById("clinicAddress").textContent = selectedClinicAddress;
+      resetAndFetch();
+    });
+    wrap.appendChild(b);
+    if (i === 0) {
+      selectedClinic        = c[1].trim();
+      selectedClinicAddress = (c[2] || "").trim();
+      document.getElementById("clinicAddress").textContent = selectedClinicAddress;
+    }
+  });
+  // Kick off first fetch after clinics are built
+  resetAndFetch();
+}
+
+// ── FETCH NOW SERVING ─────────────────────────────────────────
+async function fetchNowServing() {
+  try {
+    const r = await fetch(
+      SCRIPT_URL + "?action=getNowServing" +
+      "&doctor=" + encodeURIComponent(selectedDoctor) +
+      "&clinic=" + encodeURIComponent(selectedClinic) +
+      "&date="   + encodeURIComponent(todayStr())
+    );
+    const d  = await r.json();
+    const ns = Number(d.nowServing) || 0;
+    renderToken(ns);
+
+    // Update timestamp
+    const t = new Date();
+    document.getElementById("lastUpdated").textContent =
+      "Updated " + t.toLocaleTimeString("en-IN", { hour:"2-digit", minute:"2-digit", second:"2-digit" });
+  } catch(e) {
+    document.getElementById("lastUpdated").textContent = "Update failed";
+  }
+}
+
+function renderToken(ns) {
+  const $num  = document.getElementById("tokenNum");
+  const $sub  = document.getElementById("tokenSub");
+  const $pill = document.getElementById("nsPill");
+  const $pill_text = document.getElementById("pillText");
+
+  if (ns > 0) {
+    // Animate only if token changed
+    if (ns !== lastToken) {
+      $num.className = "";
+      void $num.offsetWidth; // force reflow
+      $num.className = "pop";
+    }
+    $num.textContent = ns;
+    $sub.textContent = selectedDoctor + "  ·  " + selectedClinic;
+    $pill.className  = "";
+    $pill_text.textContent = "Live";
+    lastToken = ns;
+  } else {
+    $num.className   = "none";
+    $num.textContent = "Not started";
+    $sub.textContent = selectedDoctor + "  ·  " + selectedClinic;
+    $pill.className  = "off";
+    $pill_text.textContent = "Waiting";
+    lastToken = null;
+  }
+}
+
+// ── COUNTDOWN TIMER ───────────────────────────────────────────
+function resetAndFetch() {
+  // Clear existing timers
+  clearInterval(refreshTimer);
+  clearInterval(countdownTimer);
+  countdown = 20;
+  document.getElementById("countdown").textContent = countdown;
+
+  // Fetch immediately
+  fetchNowServing();
+
+  // Countdown tick
+  countdownTimer = setInterval(() => {
+    countdown--;
+    document.getElementById("countdown").textContent = countdown;
+    if (countdown <= 0) countdown = 20;
+  }, 1000);
+
+  // Fetch every 20 seconds
+  refreshTimer = setInterval(() => {
+    countdown = 20;
+    fetchNowServing();
+  }, 20000);
+}
+
+// ── INIT ──────────────────────────────────────────────────────
+loadSettings();
+</script>
+</body>
+</html>
