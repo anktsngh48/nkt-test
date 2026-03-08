@@ -226,8 +226,8 @@
 </head>
 <body>
 
-<!-- One-time tap overlay to unlock unmuted autoplay — hidden by default, shown only if video URL exists in sheet -->
-<div id="startOverlay" style="display:none;">
+<!-- Overlay always shown on page load to capture gesture upfront -->
+<div id="startOverlay">
   <div class="so-icon">▶</div>
   <div class="so-text">Tap to Start Display</div>
   <div class="so-sub">Required once to enable audio</div>
@@ -578,43 +578,77 @@ function loadVideo(embedUrl) {
   currentVideoUrl      = embedUrl;
 }
 
-// ── VIDEO POLLING (every 30s) ──────────────────────────────────
-// Re-fetches settings silently. If the video URL in TVRightScreen
-// has changed, the new video starts automatically — no page refresh.
-async function pollVideoSettings() {
+// ── RIGHT PANEL POLLING (every 30s) ────────────────────────────
+// Re-fetches the full TVRightScreen row every 30 seconds.
+// Adds or removes the right panel and each element within it
+// dynamically — no page refresh needed.
+let currentVideoUrl = "";
+
+async function pollRightPanel() {
   try {
     const r    = await fetch(SCRIPT_URL + "?action=getSettings&_t=" + Date.now());
     const data = await r.json();
-    const rRow     = data.find(r => r[0] === "TVRightScreen");
-    const rVideo   = rRow ? String(rRow[4] || "").trim() : "";
+
+    const rRow   = data.find(r => r[0] === "TVRightScreen");
+    const rText  = rRow ? String(rRow[1] || "").trim() : "";
+    const rImg   = rRow ? String(rRow[2] || "").trim() : "";
+    const rGif   = rRow ? String(rRow[3] || "").trim() : "";
+    const rVideo = rRow ? String(rRow[4] || "").trim() : "";
+    const hasAny = rText || rImg || rGif || rVideo;
+
+    const rightPanel = document.getElementById("rightPanel");
+    const leftPanel  = document.getElementById("leftPanel");
+
+    // ── PANEL VISIBILITY ────────────────────────────────────────
+    if (hasAny) {
+      rightPanel.style.display = "flex";
+      leftPanel.classList.remove("full");
+    } else {
+      rightPanel.style.display = "none";
+      leftPanel.classList.add("full");
+    }
+
+    // ── TEXT ────────────────────────────────────────────────────
+    const $rt = document.getElementById("rightText");
+    if (rText) { $rt.textContent = rText; $rt.style.display = "block"; }
+    else        { $rt.textContent = "";    $rt.style.display = "none";  }
+
+    // ── IMAGE ───────────────────────────────────────────────────
+    const $ri = document.getElementById("rightImg");
+    if (rImg) { $ri.src = fixImageUrl(rImg); $ri.style.display = "block"; }
+    else      { $ri.src = "";                $ri.style.display = "none";  }
+
+    // ── GIF ─────────────────────────────────────────────────────
+    const $rg = document.getElementById("rightGif");
+    if (rGif) { $rg.src = fixImageUrl(rGif); $rg.style.display = "block"; }
+    else      { $rg.src = "";                 $rg.style.display = "none";  }
+
+    // ── VIDEO ───────────────────────────────────────────────────
     const embedUrl = rVideo ? toYouTubeEmbed(rVideo) : "";
 
-    if (embedUrl === currentVideoUrl) return; // nothing changed
-
-    if (!embedUrl) {
-      // Video was cleared from sheet — hide iframe
+    if (embedUrl !== currentVideoUrl) {
       const iframe = document.getElementById("rightVideo");
-      iframe.src = ""; iframe.style.display = "none";
-      currentVideoUrl = "";
-      return;
+      if (!embedUrl) {
+        // Video removed
+        iframe.src = ""; iframe.style.display = "none";
+        currentVideoUrl = "";
+      } else if (gestureUnlocked) {
+        // Gesture already given — load new video directly, unmuted
+        loadVideo(embedUrl);
+      } else {
+        // Gesture not yet given — this shouldn't happen since overlay
+        // always shows at launch, but handle it safely just in case
+        pendingVideoUrl = embedUrl;
+        document.getElementById("startOverlay").style.display = "flex";
+      }
     }
 
-    // New or changed video
-    if (gestureUnlocked) {
-      loadVideo(embedUrl);
-    } else {
-      // Need gesture first — show overlay
-      pendingVideoUrl = embedUrl;
-      document.getElementById("startOverlay").style.display = "flex";
-      document.getElementById("rightPanel").style.display   = "flex";
-      document.getElementById("leftPanel").classList.remove("full");
-    }
-  } catch(e) { /* silent */ }
+  } catch(e) { /* silent — keep current state */ }
 }
 
 // ── BOOT ──────────────────────────────────────────────────────
 loadSettings();
-setInterval(pollVideoSettings, 30000); // check for video changes every 30s
+setInterval(pollRightPanel, 30000);
 </script>
 </body>
 </html>
