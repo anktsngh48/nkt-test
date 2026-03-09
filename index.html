@@ -39,6 +39,7 @@
       z-index: 0;
     }
 
+    /* ── HEADER ── */
     header {
       position: relative;
       z-index: 10;
@@ -65,7 +66,7 @@
       margin-top: 4px;
     }
 
-    /* ACTIVATE OVERLAY */
+    /* ── ACTIVATE OVERLAY ── */
     #activate-screen {
       position: fixed;
       inset: 0;
@@ -75,7 +76,7 @@
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      gap: 28px;
+      gap: 24px;
       transition: opacity 0.5s ease;
     }
     #activate-screen.hidden { opacity: 0; pointer-events: none; }
@@ -95,7 +96,18 @@
       0%, 100% { filter: drop-shadow(0 0 25px rgba(0,229,255,0.5)); }
       50%       { filter: drop-shadow(0 0 40px rgba(0,229,255,0.9)); }
     }
-    .activate-sub { color: var(--muted); font-size: 0.9rem; letter-spacing: 0.08em; }
+    .activate-sub {
+      color: var(--muted);
+      font-size: 0.9rem;
+      letter-spacing: 0.08em;
+    }
+    .firefox-note {
+      font-size: 0.72rem;
+      color: rgba(255, 79, 106, 0.6);
+      text-align: center;
+      max-width: 300px;
+      line-height: 1.7;
+    }
 
     #tap-btn {
       position: relative;
@@ -124,7 +136,7 @@
     #tap-btn:hover::before { opacity: 1; }
     #tap-btn span { position: relative; z-index: 1; }
 
-    /* MAIN */
+    /* ── MAIN ── */
     #main {
       position: relative;
       z-index: 1;
@@ -137,75 +149,72 @@
       gap: 24px;
     }
 
-    /* VIDEO WRAP */
-    #video-wrap {
+    /* ── PLAYER BOX ── */
+    #player-box {
       width: 100%;
+      position: relative;
+      display: none;
       border-radius: 16px;
       overflow: hidden;
-      border: 1px solid rgba(0,229,255,0.12);
+      box-shadow: 0 0 60px rgba(0,229,255,0.15), 0 0 120px rgba(123,97,255,0.1);
       background: #000;
       aspect-ratio: 16/9;
-      position: relative;
-      transition: box-shadow 0.4s ease;
-      display: none;
+      border: 1px solid rgba(0,229,255,0.12);
     }
-    #video-wrap.active {
-      display: block;
-      box-shadow: 0 0 60px rgba(0,229,255,0.15), 0 0 120px rgba(123,97,255,0.1);
-    }
-    #video-wrap iframe {
+    #player-box.active { display: block; }
+
+    #player-box iframe {
       width: 100%;
       height: 100%;
       border: none;
       display: block;
+      position: absolute;
+      inset: 0;
     }
 
-    /* FULLSCREEN BUTTON */
+    /* ── FULLSCREEN BUTTON — lives OUTSIDE the iframe so it stays clickable ── */
     #fs-btn {
       position: absolute;
-      bottom: 10px;
-      right: 10px;
-      z-index: 20;
-      width: 38px;
-      height: 38px;
-      border-radius: 8px;
+      bottom: 12px;
+      right: 12px;
+      z-index: 30;
+      width: 40px;
+      height: 40px;
+      border-radius: 10px;
       background: rgba(5, 8, 15, 0.75);
-      border: 1px solid rgba(0,229,255,0.3);
+      border: 1.5px solid rgba(0,229,255,0.5);
       color: var(--accent);
       cursor: pointer;
       display: flex;
       align-items: center;
       justify-content: center;
-      opacity: 0;
-      transition: opacity 0.25s ease, background 0.2s ease;
-      backdrop-filter: blur(4px);
-      -webkit-backdrop-filter: blur(4px);
+      opacity: 0.65;
+      transition: opacity 0.2s, background 0.2s, transform 0.15s;
+      backdrop-filter: blur(6px);
+      -webkit-backdrop-filter: blur(6px);
+      pointer-events: all;
     }
-    #video-wrap:hover #fs-btn,
-    #video-wrap.touch-show #fs-btn { opacity: 1; }
-    #fs-btn:hover { background: rgba(0,229,255,0.15); }
-    #fs-btn svg { pointer-events: none; }
+    #player-box:hover #fs-btn,
+    #player-box.touch-show #fs-btn { opacity: 1; }
+    #fs-btn:hover  { background: rgba(0,229,255,0.2); transform: scale(1.1); }
+    #fs-btn:active { transform: scale(0.94); }
+    #fs-btn svg    { pointer-events: none; }
 
-    #video-wrap:fullscreen,
-    #video-wrap:-webkit-full-screen {
-      width: 100vw !important;
-      height: 100vh !important;
-      aspect-ratio: unset !important;
-      border-radius: 0 !important;
-      border: none !important;
-      background: #000 !important;
+    /* Fullscreen state */
+    #player-box:fullscreen,
+    #player-box:-webkit-full-screen {
+      width: 100vw;
+      height: 100vh;
+      aspect-ratio: unset;
+      border-radius: 0;
+      border: none;
     }
-    #video-wrap:fullscreen iframe,
-    #video-wrap:-webkit-full-screen iframe {
-      width: 100% !important;
-      height: 100% !important;
-    }
-    #video-wrap:fullscreen #fs-btn,
-    #video-wrap:-webkit-full-screen #fs-btn { opacity: 1; bottom: 16px; right: 16px; }
+    #player-box:fullscreen #fs-btn,
+    #player-box:-webkit-full-screen #fs-btn { opacity: 1; bottom: 18px; right: 18px; }
 
-    /* NOW PLAYING */
+    /* ── NOW PLAYING ── */
     #now-playing {
-      font-size: 0.8rem;
+      font-size: 0.82rem;
       color: var(--accent);
       letter-spacing: 0.05em;
       min-height: 1.2em;
@@ -220,7 +229,7 @@
     }
     #now-playing.visible { opacity: 1; }
 
-    /* CONTROLS */
+    /* ── CONTROLS ── */
     .controls {
       display: flex;
       flex-direction: column;
@@ -320,38 +329,44 @@
     #transcript.visible { opacity: 1; transform: translateY(0); }
 
     @media (max-width: 480px) {
-      #video-wrap { border-radius: 10px; }
+      #player-box { border-radius: 10px; }
     }
   </style>
 </head>
 <body>
 
-  <!-- ACTIVATE OVERLAY -->
+  <!-- ── ACTIVATE OVERLAY ── -->
   <div id="activate-screen">
     <div class="activate-logo">NKT JustSay</div>
     <p class="activate-sub">Voice → Song → Instant Play</p>
     <button id="tap-btn" onclick="activateSession()">
       <span>▶ &nbsp;LET ME IN</span>
     </button>
+    <p class="firefox-note">
+      Couldn't make it work on Firefox — our apologies.<br>
+      Works best on Chrome, Edge &amp; Safari.
+    </p>
   </div>
 
-  <!-- HEADER -->
+  <!-- ── HEADER ── -->
   <header>
     <h1>NKT JustSay</h1>
     <p>Say a song · It plays</p>
   </header>
 
-  <!-- MAIN -->
+  <!-- ── MAIN ── -->
   <div id="main">
 
-    <div id="video-wrap">
+    <!-- Player: iframe sits inside, fullscreen button sits on top as a sibling -->
+    <div id="player-box">
+      <!-- iframe injected here by JS -->
       <button id="fs-btn" onclick="toggleFullscreen()" title="Fullscreen">
         <svg id="fs-icon" width="18" height="18" viewBox="0 0 24 24" fill="none"
              stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
           <polyline points="15 3 21 3 21 9"/>
           <polyline points="9 21 3 21 3 15"/>
           <line x1="21" y1="3" x2="14" y2="10"/>
-          <line x1="3" y1="21" x2="10" y2="14"/>
+          <line x1="3"  y1="21" x2="10" y2="14"/>
         </svg>
       </button>
     </div>
@@ -371,7 +386,7 @@
           <rect x="9" y="2" width="6" height="11" rx="3" fill="#00e5ff"/>
           <path d="M5 10a7 7 0 0 0 14 0" stroke="#00e5ff" stroke-width="2" stroke-linecap="round"/>
           <line x1="12" y1="17" x2="12" y2="21" stroke="#00e5ff" stroke-width="2" stroke-linecap="round"/>
-          <line x1="9" y1="21" x2="15" y2="21" stroke="#00e5ff" stroke-width="2" stroke-linecap="round"/>
+          <line x1="9"  y1="21" x2="15" y2="21" stroke="#00e5ff" stroke-width="2" stroke-linecap="round"/>
         </svg>
       </button>
 
@@ -383,16 +398,15 @@
 
   <script>
     // ─────────────────────────────────────────────────────────────────────────
-    //  SEARCH  : CORS proxy → fetch YouTube search HTML → regex out videoId+title
-    //  PLAYBACK: youtube-nocookie.com/embed  (no ads, no tracking, always works)
+    //  HOW IT WORKS — completely zero-dependency, no accounts, no API keys
+    //
+    //  YouTube's own embed player supports a search mode:
+    //    youtube-nocookie.com/embed?listType=search&list=QUERY&autoplay=1
+    //
+    //  This tells YouTube to run a search internally and autoplay the top
+    //  result — all inside their own iframe. Nothing leaves the browser.
+    //  No CORS, no proxy, no keys. Just a URL.
     // ─────────────────────────────────────────────────────────────────────────
-
-    // Three independent CORS proxies, tried in order
-    const PROXIES = [
-      q => `https://api.allorigins.win/get?url=${encodeURIComponent(q)}`,
-      q => `https://corsproxy.io/?${encodeURIComponent(q)}`,
-      q => `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(q)}`,
-    ];
 
     let sessionActive = false;
     let recognition   = null;
@@ -410,7 +424,7 @@
     function setupRecognition() {
       const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
       if (!SR) {
-        setStatus('Speech recognition not supported — use Chrome or Edge', 'error');
+        setStatus('Voice not supported in Firefox — try Chrome or Edge', 'error');
         return null;
       }
       const r         = new SR();
@@ -431,7 +445,7 @@
         if (e.results[e.results.length - 1].isFinal) {
           const q = e.results[e.results.length - 1][0].transcript.trim();
           showTranscript(q, true);
-          handleQuery(q);
+          playSearch(q);
         }
       };
       r.onerror = (e) => {
@@ -457,180 +471,78 @@
       catch (err) { setStatus('Could not start mic: ' + err.message, 'error'); }
     }
 
-    // ── SEARCH ───────────────────────────────────────────────────────────────
-    async function handleQuery(query) {
+    // ── PLAY via YouTube search embed ─────────────────────────────────────────
+    function playSearch(query) {
       if (!query) return;
-      setStatus(`Searching for "${query}"…`, 'searching');
-      try {
-        const result = await searchYouTube(query);
-        playVideo(result.videoId, result.title);
-      } catch (err) {
-        console.error(err);
-        setStatus(`Could not find "${query}" — try again`, 'error');
-      }
-    }
+      setStatus('Loading…', 'searching');
 
-    async function searchYouTube(query) {
-      // Search YouTube directly; the HTML page contains JSON with all result data
-      const ytUrl = `https://www.youtube.com/results?search_query=${encodeURIComponent(query + ' official audio')}`;
+      const box = document.getElementById('player-box');
 
-      for (let i = 0; i < PROXIES.length; i++) {
-        try {
-          const res = await fetchWithTimeout(PROXIES[i](ytUrl), 12000);
-          if (!res.ok) { console.warn('Proxy', i, 'HTTP', res.status); continue; }
-
-          // allorigins returns JSON wrapper; others return raw HTML
-          let html;
-          const ct = res.headers.get('content-type') || '';
-          if (ct.includes('application/json')) {
-            const j = await res.json();
-            html = j.contents || j.body || '';
-          } else {
-            html = await res.text();
-          }
-
-          const result = extractFirstVideo(html);
-          if (result) {
-            console.log('Found via proxy', i, ':', result.title, result.videoId);
-            return result;
-          }
-          console.warn('Proxy', i, ': HTML received but no video found');
-        } catch (e) {
-          console.warn('Proxy', i, 'error:', e.message);
-        }
-      }
-      throw new Error('All proxies exhausted');
-    }
-
-    function extractFirstVideo(html) {
-      if (!html || html.length < 500) return null;
-
-      // YouTube embeds a JS variable: var ytInitialData = {...};
-      // We pull videoId + title pairs out of it with a targeted regex.
-      // Pattern matches: "videoId":"XXXXXXXXXXX"  anywhere in the page data.
-
-      // Collect all videoId occurrences
-      const idMatches = [...html.matchAll(/"videoId":"([a-zA-Z0-9_-]{11})"/g)];
-      if (!idMatches.length) return null;
-
-      // The first videoId in ytInitialData is the top search result.
-      // Skip any that appear before ytInitialData (e.g. in inline scripts/ads).
-      const dataStart = html.indexOf('ytInitialData');
-      const candidates = dataStart > -1
-        ? idMatches.filter(m => m.index > dataStart)
-        : idMatches;
-
-      const match = candidates[0] || idMatches[0];
-      const videoId = match[1];
-
-      // Extract title: scan a window of text around the videoId match for a title field.
-      // YouTube structure near a result: ..."videoId":"ID"...,"title":{"runs":[{"text":"TITLE"}
-      // We search backwards from the match index to find the nearest title.
-      const searchStart = Math.max(0, match.index - 3000);
-      const searchEnd   = Math.min(html.length, match.index + 1000);
-      const chunk       = html.substring(searchStart, searchEnd);
-
-      let title = '';
-
-      // Try structured title pattern first
-      const t1 = chunk.match(/"title":\{"runs":\[\{"text":"((?:[^"\\]|\\.)*)"\}/);
-      if (t1) title = t1[1];
-
-      // Fallback: simpleText pattern
-      if (!title) {
-        const t2 = chunk.match(/"title":\{"simpleText":"((?:[^"\\]|\\.)*)"\}/);
-        if (t2) title = t2[1];
-      }
-
-      // Last resort: any reasonable quoted string near the ID
-      if (!title) {
-        const t3 = chunk.match(/"text":"([^"]{8,100})"/);
-        if (t3) title = t3[1];
-      }
-
-      if (!title) title = 'Now Playing';
-
-      // Unescape common sequences
-      title = title
-        .replace(/\\u0026/g, '&')
-        .replace(/\\u003c/g, '<')
-        .replace(/\\u003e/g, '>')
-        .replace(/\\"/g, '"')
-        .replace(/\\\//g, '/');
-
-      return { videoId, title };
-    }
-
-    // ── PLAY VIDEO ───────────────────────────────────────────────────────────
-    // youtube-nocookie.com = YouTube's own privacy-enhanced embed
-    // — no cookies, no personalised ads, completely reliable
-    function playVideo(videoId, title) {
-      const wrap = document.getElementById('video-wrap');
-      const old  = wrap.querySelector('iframe');
+      // Remove any existing iframe
+      const old = box.querySelector('iframe');
       if (old) old.remove();
 
+      // Build the YouTube search-embed URL
+      // listType=search tells YouTube to treat 'list' as a search query
+      // autoplay=1  plays the first result immediately (works because user
+      //             already tapped "Let Me In" — that gesture unlocks autoplay)
+      const searchQuery = encodeURIComponent(query + ' song');
+      const src = `https://www.youtube-nocookie.com/embed?listType=search&list=${searchQuery}&autoplay=1&rel=0&modestbranding=1`;
+
       const iframe           = document.createElement('iframe');
-      iframe.src             = `https://www.youtube-nocookie.com/embed/${videoId}?autoplay=1&rel=0&modestbranding=1`;
+      iframe.src             = src;
       iframe.allow           = 'autoplay; fullscreen; picture-in-picture';
       iframe.allowFullscreen = true;
-      iframe.title           = title;
+      iframe.title           = query;
 
-      // Insert before the FS button so the button stays on top
-      wrap.insertBefore(iframe, document.getElementById('fs-btn'));
-      wrap.classList.add('active');
+      // Insert before the FS button so button stays on top
+      box.insertBefore(iframe, document.getElementById('fs-btn'));
+      box.classList.add('active');
 
       setStatus('Now playing', 'playing');
-      showNowPlaying(title);
+      showNowPlaying(query);
       showTranscript('', false);
     }
 
     // ── FULLSCREEN ────────────────────────────────────────────────────────────
     function toggleFullscreen() {
-      const wrap = document.getElementById('video-wrap');
-      const inFS = document.fullscreenElement || document.webkitFullscreenElement
+      const box  = document.getElementById('player-box');
+      const inFS = document.fullscreenElement    || document.webkitFullscreenElement
                 || document.mozFullScreenElement || document.msFullscreenElement;
       if (!inFS) {
-        (wrap.requestFullscreen || wrap.webkitRequestFullscreen
-         || wrap.mozRequestFullScreen || wrap.msRequestFullscreen).call(wrap);
+        (box.requestFullscreen    || box.webkitRequestFullscreen
+         || box.mozRequestFullScreen || box.msRequestFullscreen).call(box);
       } else {
-        (document.exitFullscreen || document.webkitExitFullscreen
+        (document.exitFullscreen    || document.webkitExitFullscreen
          || document.mozCancelFullScreen || document.msExitFullscreen).call(document);
       }
     }
 
     function onFSChange() {
-      const inFS = !!(document.fullscreenElement || document.webkitFullscreenElement
+      const inFS = !!(document.fullscreenElement    || document.webkitFullscreenElement
                    || document.mozFullScreenElement || document.msFullscreenElement);
       document.getElementById('fs-icon').innerHTML = inFS ? `
         <polyline points="4 14 10 14 10 20"/>
         <polyline points="20 10 14 10 14 4"/>
-        <line x1="10" y1="14" x2="3" y2="21"/>
-        <line x1="21" y1="3" x2="14" y2="10"/>` : `
+        <line x1="10" y1="14" x2="3"  y2="21"/>
+        <line x1="21" y1="3"  x2="14" y2="10"/>` : `
         <polyline points="15 3 21 3 21 9"/>
         <polyline points="9 21 3 21 3 15"/>
-        <line x1="21" y1="3" x2="14" y2="10"/>
-        <line x1="3" y1="21" x2="10" y2="14"/>`;
+        <line x1="21" y1="3"  x2="14" y2="10"/>
+        <line x1="3"  y1="21" x2="10" y2="14"/>`;
     }
 
     ['fullscreenchange','webkitfullscreenchange','mozfullscreenchange']
-      .forEach(e => document.addEventListener(e, onFSChange));
+      .forEach(ev => document.addEventListener(ev, onFSChange));
 
-    // Mobile: tap video area to reveal the fullscreen button briefly
-    document.getElementById('video-wrap').addEventListener('touchstart', function() {
+    // Mobile: tap to show fullscreen button for 3s
+    document.getElementById('player-box').addEventListener('touchstart', function () {
       this.classList.add('touch-show');
-      clearTimeout(this._touchTimer);
-      this._touchTimer = setTimeout(() => this.classList.remove('touch-show'), 3000);
+      clearTimeout(this._t);
+      this._t = setTimeout(() => this.classList.remove('touch-show'), 3000);
     }, { passive: true });
 
-    // ── HELPERS ──────────────────────────────────────────────────────────────
-    function fetchWithTimeout(url, ms) {
-      const ctrl = new AbortController();
-      const id   = setTimeout(() => ctrl.abort(), ms);
-      return fetch(url, { signal: ctrl.signal })
-        .then(r  => { clearTimeout(id); return r;  })
-        .catch(e => { clearTimeout(id); throw e;   });
-    }
-
+    // ── UI HELPERS ────────────────────────────────────────────────────────────
     function setMicState(on) {
       const btn  = document.getElementById('mic-btn');
       const icon = document.getElementById('mic-icon');
@@ -648,7 +560,7 @@
           <rect x="9" y="2" width="6" height="11" rx="3" fill="#00e5ff"/>
           <path d="M5 10a7 7 0 0 0 14 0" stroke="#00e5ff" stroke-width="2" stroke-linecap="round"/>
           <line x1="12" y1="17" x2="12" y2="21" stroke="#00e5ff" stroke-width="2" stroke-linecap="round"/>
-          <line x1="9" y1="21" x2="15" y2="21" stroke="#00e5ff" stroke-width="2" stroke-linecap="round"/>`;
+          <line x1="9"  y1="21" x2="15" y2="21" stroke="#00e5ff" stroke-width="2" stroke-linecap="round"/>`;
       }
     }
 
