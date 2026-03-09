@@ -47,7 +47,6 @@
       padding: 28px 20px 14px;
       border-bottom: 1px solid rgba(0,229,255,0.08);
     }
-
     header h1 {
       font-family: 'Orbitron', sans-serif;
       font-size: clamp(1.6rem, 5vw, 2.4rem);
@@ -59,7 +58,6 @@
       background-clip: text;
       filter: drop-shadow(0 0 20px rgba(0,229,255,0.4));
     }
-
     header p {
       font-size: 0.75rem;
       color: var(--muted);
@@ -81,11 +79,7 @@
       gap: 28px;
       transition: opacity 0.5s ease;
     }
-
-    #activate-screen.hidden {
-      opacity: 0;
-      pointer-events: none;
-    }
+    #activate-screen.hidden { opacity: 0; pointer-events: none; }
 
     .activate-logo {
       font-family: 'Orbitron', sans-serif;
@@ -98,17 +92,11 @@
       filter: drop-shadow(0 0 25px rgba(0,229,255,0.5));
       animation: pulse-glow 2.5s ease-in-out infinite;
     }
-
     @keyframes pulse-glow {
       0%, 100% { filter: drop-shadow(0 0 25px rgba(0,229,255,0.5)); }
       50%       { filter: drop-shadow(0 0 40px rgba(0,229,255,0.9)); }
     }
-
-    .activate-sub {
-      color: var(--muted);
-      font-size: 0.9rem;
-      letter-spacing: 0.08em;
-    }
+    .activate-sub { color: var(--muted); font-size: 0.9rem; letter-spacing: 0.08em; }
 
     #tap-btn {
       position: relative;
@@ -125,7 +113,6 @@
       transition: all 0.25s ease;
       overflow: hidden;
     }
-
     #tap-btn::before {
       content: '';
       position: absolute;
@@ -134,7 +121,6 @@
       opacity: 0;
       transition: opacity 0.25s ease;
     }
-
     #tap-btn:hover { box-shadow: 0 0 40px rgba(0,229,255,0.4); color: var(--bg); }
     #tap-btn:hover::before { opacity: 1; }
     #tap-btn span { position: relative; z-index: 1; }
@@ -152,7 +138,7 @@
       gap: 24px;
     }
 
-    /* ── VIDEO WRAP — hidden until first song ── */
+    /* ── VIDEO WRAP ── */
     #video-wrap {
       width: 100%;
       border-radius: 16px;
@@ -164,18 +150,11 @@
       transition: box-shadow 0.4s ease;
       display: none;
     }
-
     #video-wrap.active {
       display: block;
       box-shadow: 0 0 60px rgba(0,229,255,0.15), 0 0 120px rgba(123,97,255,0.1);
     }
-
-    #video-wrap iframe {
-      width: 100%;
-      height: 100%;
-      border: none;
-      display: block;
-    }
+    #video-wrap iframe { width: 100%; height: 100%; border: none; display: block; }
 
     /* ── NOW PLAYING ── */
     #now-playing {
@@ -216,20 +195,16 @@
       align-items: center;
       justify-content: center;
     }
-
     #mic-btn:hover { border-color: var(--accent); box-shadow: var(--glow); }
-
     #mic-btn.listening {
       border-color: var(--danger);
       background: linear-gradient(145deg, #ff4f6a22, #ff4f6a11);
       animation: mic-pulse 1s ease-in-out infinite;
     }
-
     @keyframes mic-pulse {
       0%, 100% { box-shadow: 0 0 0 0    rgba(255,79,106,0.5); }
       50%       { box-shadow: 0 0 0 20px rgba(255,79,106,0);   }
     }
-
     #mic-btn .ring {
       position: absolute;
       inset: -8px;
@@ -237,16 +212,13 @@
       border: 2px solid var(--danger);
       opacity: 0;
     }
-
     #mic-btn.listening .ring:nth-child(1) { animation: ring-out 1.4s ease-out 0s   infinite; }
     #mic-btn.listening .ring:nth-child(2) { animation: ring-out 1.4s ease-out 0.4s infinite; }
     #mic-btn.listening .ring:nth-child(3) { animation: ring-out 1.4s ease-out 0.8s infinite; }
-
     @keyframes ring-out {
       0%   { inset: -4px;  opacity: 0.6; }
       100% { inset: -28px; opacity: 0;   }
     }
-
     #mic-btn svg { transition: all 0.3s ease; }
 
     /* WAVEFORM */
@@ -259,13 +231,7 @@
       transition: opacity 0.3s ease;
     }
     #waveform.active { opacity: 1; }
-
-    #waveform .bar {
-      width: 4px;
-      border-radius: 2px;
-      background: var(--danger);
-    }
-
+    #waveform .bar { width: 4px; border-radius: 2px; background: var(--danger); }
     #waveform.active .bar { animation: wave-bounce 0.8s ease-in-out infinite alternate; }
     #waveform .bar:nth-child(1) { animation-delay: 0s;    }
     #waveform .bar:nth-child(2) { animation-delay: 0.1s;  }
@@ -275,11 +241,7 @@
     #waveform .bar:nth-child(6) { animation-delay: 0.25s; }
     #waveform .bar:nth-child(7) { animation-delay: 0s;    }
     #waveform .bar:nth-child(8) { animation-delay: 0.12s; }
-
-    @keyframes wave-bounce {
-      from { height: 4px;  }
-      to   { height: 28px; }
-    }
+    @keyframes wave-bounce { from { height: 4px; } to { height: 28px; } }
 
     #status {
       font-size: 0.82rem;
@@ -312,8 +274,67 @@
     }
     #transcript.visible { opacity: 1; transform: translateY(0); }
 
+    /* ── API KEY SETUP ── */
+    #api-setup {
+      background: var(--card);
+      border: 1px solid rgba(0,229,255,0.15);
+      border-radius: 14px;
+      padding: 20px 24px;
+      width: 100%;
+      display: none;
+      flex-direction: column;
+      gap: 12px;
+    }
+    #api-setup.visible { display: flex; }
+    #api-setup p { font-size: 0.8rem; color: var(--muted); line-height: 1.6; }
+    #api-setup a { color: var(--accent); text-decoration: none; }
+    #api-setup a:hover { text-decoration: underline; }
+
+    .api-row { display: flex; gap: 10px; }
+    #api-key-input {
+      flex: 1;
+      background: #0c1220;
+      border: 1px solid rgba(0,229,255,0.2);
+      border-radius: 8px;
+      padding: 10px 14px;
+      color: var(--text);
+      font-family: 'Sora', sans-serif;
+      font-size: 0.82rem;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+    #api-key-input:focus { border-color: var(--accent); }
+    #api-key-input::placeholder { color: var(--muted); }
+
+    #save-key-btn {
+      background: var(--accent);
+      border: none;
+      border-radius: 8px;
+      padding: 10px 20px;
+      color: var(--bg);
+      font-family: 'Orbitron', sans-serif;
+      font-size: 0.75rem;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      cursor: pointer;
+      transition: opacity 0.2s;
+    }
+    #save-key-btn:hover { opacity: 0.85; }
+
+    #toggle-setup {
+      font-size: 0.72rem;
+      color: var(--muted);
+      text-align: center;
+      cursor: pointer;
+      text-decoration: underline;
+      text-underline-offset: 3px;
+      transition: color 0.2s;
+    }
+    #toggle-setup:hover { color: var(--text); }
+
     @media (max-width: 480px) {
       #video-wrap { border-radius: 10px; }
+      .api-row { flex-direction: column; }
     }
   </style>
 </head>
@@ -337,13 +358,9 @@
   <!-- MAIN -->
   <div id="main">
 
-    <!-- Video panel — hidden until first song loads -->
     <div id="video-wrap"></div>
-
-    <!-- Now playing label -->
     <div id="now-playing"></div>
 
-    <!-- Controls -->
     <div class="controls">
       <div id="waveform">
         <div class="bar"></div><div class="bar"></div><div class="bar"></div>
@@ -352,9 +369,7 @@
       </div>
 
       <button id="mic-btn" onclick="toggleListen()" title="Start Listening">
-        <div class="ring"></div>
-        <div class="ring"></div>
-        <div class="ring"></div>
+        <div class="ring"></div><div class="ring"></div><div class="ring"></div>
         <svg id="mic-icon" width="32" height="32" viewBox="0 0 24 24" fill="none">
           <rect x="9" y="2" width="6" height="11" rx="3" fill="#00e5ff"/>
           <path d="M5 10a7 7 0 0 0 14 0" stroke="#00e5ff" stroke-width="2" stroke-linecap="round"/>
@@ -367,30 +382,71 @@
       <div id="transcript"></div>
     </div>
 
+    <!-- API KEY SETUP (shown if Piped also fails) -->
+    <div id="api-setup">
+      <p>
+        Search servers are unreachable from your network.<br>
+        Enter a free <a href="https://console.cloud.google.com/apis/library/youtube.googleapis.com" target="_blank">YouTube Data API v3 key</a> to use as backup
+        (10,000 free searches/day — takes ~2 min to set up).
+      </p>
+      <div class="api-row">
+        <input id="api-key-input" type="text" placeholder="Paste your YouTube API key here" />
+        <button id="save-key-btn" onclick="saveApiKey()">SAVE</button>
+      </div>
+    </div>
+    <div id="toggle-setup" onclick="toggleSetup()" style="display:none">⚙ Use my own YouTube API key</div>
+
   </div>
 
   <script>
-    // ── INVIDIOUS INSTANCES (tried in order, first working one wins) ─────────
-    const INVIDIOUS = [
+    // ─────────────────────────────────────────────────────────────────────────
+    // SEARCH STRATEGY
+    //   1. Piped API (open, CORS-friendly, no key needed) — multiple instances
+    //   2. YouTube Data API v3 (if user supplied a key)
+    //   Playback: always via Invidious embed (ad-free)
+    // ─────────────────────────────────────────────────────────────────────────
+
+    const PIPED_INSTANCES = [
+      'https://pipedapi.kavin.rocks',
+      'https://pipedapi.adminforge.de',
+      'https://api.piped.projectsegfau.lt',
+      'https://piped-api.garudalinux.org',
+      'https://watchapi.whatever.social',
+    ];
+
+    // Invidious instances used only for the embed player (not for API calls)
+    const INVIDIOUS_EMBED = [
       'https://invidious.lunar.icu',
-      'https://inv.nadeko.net',
       'https://yewtu.be',
-      'https://invidious.privacydev.net',
-      'https://invidious.nerdvpn.de',
-      'https://iv.ggtyler.dev',
-      'https://invidious.io',
+      'https://inv.nadeko.net',
     ];
 
     let sessionActive = false;
     let recognition   = null;
     let isListening   = false;
+    let youtubeApiKey = '';
+    let embedInstance = INVIDIOUS_EMBED[0];
 
-    // ── SESSION ACTIVATE ──────────────────────────────────────────────────────
+    // ── SESSION ──────────────────────────────────────────────────────────────
     function activateSession() {
       sessionActive = true;
       const s = document.getElementById('activate-screen');
       s.classList.add('hidden');
       setTimeout(() => s.style.display = 'none', 500);
+      // Warm up: probe Invidious embed instance
+      probeEmbedInstance();
+      // Show the API key toggle
+      document.getElementById('toggle-setup').style.display = 'block';
+    }
+
+    // Pick the first Invidious instance that responds (for embeds)
+    async function probeEmbedInstance() {
+      for (const inst of INVIDIOUS_EMBED) {
+        try {
+          const r = await fetchWithTimeout(`${inst}/api/v1/stats`, 4000);
+          if (r.ok) { embedInstance = inst; return; }
+        } catch(_) {}
+      }
     }
 
     // ── SPEECH RECOGNITION ───────────────────────────────────────────────────
@@ -400,7 +456,6 @@
         setStatus('Speech recognition not supported — use Chrome or Edge', 'error');
         return null;
       }
-
       const r         = new SR();
       r.lang            = 'en-US';
       r.continuous      = false;
@@ -413,18 +468,15 @@
         setStatus('Listening… speak a song name', 'listening');
         showTranscript('', true);
       };
-
       r.onresult = (e) => {
         const interim = Array.from(e.results).map(x => x[0].transcript).join('');
         showTranscript(interim, true);
-
         if (e.results[e.results.length - 1].isFinal) {
-          const query = e.results[e.results.length - 1][0].transcript.trim();
-          showTranscript(query, true);
-          handleQuery(query);
+          const q = e.results[e.results.length - 1][0].transcript.trim();
+          showTranscript(q, true);
+          handleQuery(q);
         }
       };
-
       r.onerror = (e) => {
         isListening = false;
         setMicState(false);
@@ -435,9 +487,7 @@
         };
         setStatus(msgs[e.error] || `Mic error: ${e.error}`, 'error');
       };
-
       r.onend = () => { isListening = false; setMicState(false); };
-
       return r;
     }
 
@@ -456,14 +506,95 @@
       setStatus(`Searching for "${query}"…`, 'searching');
       try {
         const result = await searchVideo(query);
-        playVideo(result.videoId, result.title, result.instance);
+        playVideo(result.videoId, result.title);
       } catch (err) {
         console.error(err);
-        setStatus('Could not reach search servers — check your connection', 'error');
+        setStatus('Search servers unreachable — see setup below', 'error');
+        document.getElementById('api-setup').classList.add('visible');
       }
     }
 
-    // AbortController timeout — works in all browsers (unlike AbortSignal.timeout)
+    async function searchVideo(query) {
+      // ── Try Piped first (no API key needed, CORS allowed) ──
+      for (const base of PIPED_INSTANCES) {
+        try {
+          const url = `${base}/search?q=${encodeURIComponent(query)}&filter=videos`;
+          const res = await fetchWithTimeout(url, 7000);
+          if (!res.ok) { console.warn(base, res.status); continue; }
+          const data = await res.json();
+          const items = (data.items || []).filter(i => i.type === 'stream' || i.url);
+          if (items.length > 0) {
+            const item = items[0];
+            // Piped returns url like "/watch?v=VIDEO_ID"
+            const videoId = (item.url || '').replace('/watch?v=', '').split('&')[0]
+                         || item.videoId;
+            if (videoId) return { videoId, title: item.title };
+          }
+        } catch (e) {
+          console.warn(`Piped ${base} failed:`, e.message);
+        }
+      }
+
+      // ── Fallback: YouTube Data API v3 (if user provided key) ──
+      if (youtubeApiKey) {
+        return await searchYouTubeAPI(query);
+      }
+
+      throw new Error('All search methods exhausted');
+    }
+
+    async function searchYouTubeAPI(query) {
+      const url = `https://www.googleapis.com/youtube/v3/search?part=snippet&type=video&maxResults=1&q=${encodeURIComponent(query)}&key=${youtubeApiKey}`;
+      const res = await fetchWithTimeout(url, 8000);
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        throw new Error(err?.error?.message || `YouTube API error ${res.status}`);
+      }
+      const data = await res.json();
+      if (!data.items || data.items.length === 0) throw new Error('No results');
+      const item = data.items[0];
+      return {
+        videoId: item.id.videoId,
+        title:   item.snippet.title,
+      };
+    }
+
+    // ── PLAY VIDEO ───────────────────────────────────────────────────────────
+    function playVideo(videoId, title) {
+      const wrap = document.getElementById('video-wrap');
+      const old  = wrap.querySelector('iframe');
+      if (old) old.remove();
+
+      // Invidious embed = ad-free player
+      const iframe = document.createElement('iframe');
+      iframe.src             = `${embedInstance}/embed/${videoId}?autoplay=1&listen=0&quality=hd720`;
+      iframe.allow           = 'autoplay; fullscreen; picture-in-picture';
+      iframe.allowFullscreen = true;
+      iframe.title           = title || 'Video';
+
+      wrap.appendChild(iframe);
+      wrap.classList.add('active');
+
+      setStatus('Now playing', 'playing');
+      showNowPlaying(title || videoId);
+      showTranscript('', false);
+    }
+
+    // ── API KEY SETUP ─────────────────────────────────────────────────────────
+    function saveApiKey() {
+      const val = document.getElementById('api-key-input').value.trim();
+      if (!val) return;
+      youtubeApiKey = val;
+      document.getElementById('api-setup').classList.remove('visible');
+      setStatus('API key saved — try the mic again', 'playing');
+    }
+
+    function toggleSetup() {
+      const el = document.getElementById('api-setup');
+      el.classList.toggle('visible');
+    }
+
+    // ── HELPERS ───────────────────────────────────────────────────────────────
     function fetchWithTimeout(url, ms) {
       const ctrl = new AbortController();
       const id   = setTimeout(() => ctrl.abort(), ms);
@@ -472,52 +603,10 @@
         .catch(err => { clearTimeout(id); throw err;  });
     }
 
-    async function searchVideo(query) {
-      const path = `/api/v1/search?q=${encodeURIComponent(query)}&type=video&page=1`;
-
-      for (const instance of INVIDIOUS) {
-        try {
-          const res = await fetchWithTimeout(instance + path, 7000);
-          if (!res.ok) { console.warn(instance, res.status); continue; }
-          const data = await res.json();
-          if (Array.isArray(data) && data.length > 0) {
-            return { videoId: data[0].videoId, title: data[0].title, instance };
-          }
-        } catch (e) {
-          console.warn(`${instance} failed:`, e.message);
-        }
-      }
-      throw new Error('All Invidious instances failed');
-    }
-
-    // ── PLAY VIDEO ───────────────────────────────────────────────────────────
-    function playVideo(videoId, title, instance) {
-      const wrap = document.getElementById('video-wrap');
-
-      const old = wrap.querySelector('iframe');
-      if (old) old.remove();
-
-      // Invidious embed strips all ads
-      const iframe = document.createElement('iframe');
-      iframe.src             = `${instance}/embed/${videoId}?autoplay=1&listen=0&quality=hd720`;
-      iframe.allow           = 'autoplay; fullscreen; picture-in-picture';
-      iframe.allowFullscreen = true;
-      iframe.title           = title || 'Video';
-
-      wrap.appendChild(iframe);
-      wrap.classList.add('active');     // shows the video panel for the first time
-
-      setStatus('Now playing', 'playing');
-      showNowPlaying(title || videoId);
-      showTranscript('', false);
-    }
-
-    // ── UI HELPERS ───────────────────────────────────────────────────────────
     function setMicState(on) {
       const btn  = document.getElementById('mic-btn');
       const icon = document.getElementById('mic-icon');
       const wave = document.getElementById('waveform');
-
       if (on) {
         btn.classList.add('listening');
         wave.classList.add('active');
@@ -553,9 +642,8 @@
       el.classList.add('visible');
     }
 
-    // Spacebar shortcut
     document.addEventListener('keydown', (e) => {
-      if (e.code === 'Space' && e.target.tagName !== 'BUTTON') {
+      if (e.code === 'Space' && e.target.tagName !== 'BUTTON' && e.target.tagName !== 'INPUT') {
         e.preventDefault();
         toggleListen();
       }
