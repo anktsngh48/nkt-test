@@ -30,41 +30,33 @@
 
     body::before {
       content: '';
-      position: fixed;
-      inset: 0;
+      position: fixed; inset: 0;
       background:
         radial-gradient(ellipse 60% 50% at 20% 10%, rgba(0,229,255,0.06) 0%, transparent 60%),
         radial-gradient(ellipse 50% 40% at 80% 80%, rgba(123,97,255,0.07) 0%, transparent 60%);
-      pointer-events: none;
-      z-index: 0;
+      pointer-events: none; z-index: 0;
     }
 
-    /* ── FULLSCREEN BAR ── */
+    /* FULLSCREEN BAR */
     #fs-bar {
-      position: relative;
-      z-index: 20;
-      width: 100%;
-      text-align: center;
+      position: relative; z-index: 20;
+      width: 100%; text-align: center;
       padding: 8px 20px;
       font-family: 'Orbitron', sans-serif;
-      font-size: 0.7rem;
-      font-weight: 700;
-      letter-spacing: 0.2em;
-      text-transform: uppercase;
+      font-size: 0.7rem; font-weight: 700;
+      letter-spacing: 0.2em; text-transform: uppercase;
       color: var(--accent);
-      background: rgba(0, 229, 255, 0.04);
-      border-bottom: 1px solid rgba(0, 229, 255, 0.1);
-      cursor: pointer;
+      background: rgba(0,229,255,0.04);
+      border-bottom: 1px solid rgba(0,229,255,0.1);
+      cursor: pointer; user-select: none;
       transition: background 0.2s;
-      user-select: none;
     }
-    #fs-bar:hover { background: rgba(0, 229, 255, 0.09); }
+    #fs-bar:hover { background: rgba(0,229,255,0.09); }
     #fs-bar.hidden { display: none; }
 
-    /* ── HEADER ── */
+    /* HEADER */
     header {
-      position: relative;
-      z-index: 10;
+      position: relative; z-index: 10;
       text-align: center;
       padding: 22px 20px 12px;
       border-bottom: 1px solid rgba(0,229,255,0.08);
@@ -72,161 +64,104 @@
     header h1 {
       font-family: 'Orbitron', sans-serif;
       font-size: clamp(1.6rem, 5vw, 2.4rem);
-      font-weight: 900;
-      letter-spacing: 0.12em;
+      font-weight: 900; letter-spacing: 0.12em;
       background: linear-gradient(135deg, #00e5ff 0%, #7b61ff 100%);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
       background-clip: text;
       filter: drop-shadow(0 0 20px rgba(0,229,255,0.4));
     }
     header p {
-      font-size: 0.75rem;
-      color: var(--muted);
-      letter-spacing: 0.2em;
-      text-transform: uppercase;
-      margin-top: 4px;
+      font-size: 0.75rem; color: var(--muted);
+      letter-spacing: 0.2em; text-transform: uppercase; margin-top: 4px;
     }
 
-    /* ── ACTIVATE OVERLAY ── */
+    /* ACTIVATE OVERLAY */
     #activate-screen {
-      position: fixed;
-      inset: 0;
-      z-index: 100;
+      position: fixed; inset: 0; z-index: 100;
       background: var(--bg);
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      gap: 24px;
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center; gap: 24px;
       transition: opacity 0.5s ease;
     }
     #activate-screen.hidden { opacity: 0; pointer-events: none; }
 
     .activate-logo {
       font-family: 'Orbitron', sans-serif;
-      font-size: clamp(2rem, 8vw, 3.5rem);
-      font-weight: 900;
+      font-size: clamp(2rem, 8vw, 3.5rem); font-weight: 900;
       background: linear-gradient(135deg, #00e5ff 0%, #7b61ff 100%);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
       background-clip: text;
       filter: drop-shadow(0 0 25px rgba(0,229,255,0.5));
       animation: pulse-glow 2.5s ease-in-out infinite;
     }
     @keyframes pulse-glow {
-      0%, 100% { filter: drop-shadow(0 0 25px rgba(0,229,255,0.5)); }
-      50%       { filter: drop-shadow(0 0 40px rgba(0,229,255,0.9)); }
+      0%,100% { filter: drop-shadow(0 0 25px rgba(0,229,255,0.5)); }
+      50%      { filter: drop-shadow(0 0 40px rgba(0,229,255,0.9)); }
     }
     .activate-sub { color: var(--muted); font-size: 0.9rem; letter-spacing: 0.08em; }
     .firefox-note {
-      position: absolute;
-      bottom: 28px;
-      left: 0; right: 0;
-      text-align: center;
-      font-size: 0.72rem;
-      color: rgba(0, 229, 255, 0.35);
-      letter-spacing: 0.06em;
+      position: absolute; bottom: 28px; left: 0; right: 0;
+      text-align: center; font-size: 0.72rem;
+      color: rgba(0,229,255,0.35); letter-spacing: 0.06em;
     }
 
     #tap-btn {
-      position: relative;
-      background: transparent;
-      border: 2px solid var(--accent);
-      color: var(--accent);
+      position: relative; background: transparent;
+      border: 2px solid var(--accent); color: var(--accent);
       font-family: 'Orbitron', sans-serif;
-      font-size: 0.95rem;
-      font-weight: 700;
-      letter-spacing: 0.15em;
-      padding: 18px 48px;
-      border-radius: 60px;
-      cursor: pointer;
-      transition: all 0.25s ease;
-      overflow: hidden;
+      font-size: 0.95rem; font-weight: 700; letter-spacing: 0.15em;
+      padding: 18px 48px; border-radius: 60px;
+      cursor: pointer; transition: all 0.25s ease; overflow: hidden;
     }
     #tap-btn::before {
-      content: '';
-      position: absolute;
-      inset: 0;
-      background: var(--accent);
-      opacity: 0;
-      transition: opacity 0.25s ease;
+      content: ''; position: absolute; inset: 0;
+      background: var(--accent); opacity: 0; transition: opacity 0.25s ease;
     }
     #tap-btn:hover { box-shadow: 0 0 40px rgba(0,229,255,0.4); color: var(--bg); }
     #tap-btn:hover::before { opacity: 1; }
     #tap-btn span { position: relative; z-index: 1; }
 
-    /* ── MAIN ── */
+    /* MAIN */
     #main {
-      position: relative;
-      z-index: 1;
-      max-width: 900px;
-      margin: 0 auto;
+      position: relative; z-index: 1;
+      max-width: 900px; margin: 0 auto;
       padding: 24px 16px 40px;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 24px;
+      display: flex; flex-direction: column; align-items: center; gap: 24px;
     }
 
-    /* ── PLAYER BOX ── */
+    /* PLAYER BOX */
     #player-box {
-      width: 100%;
-      position: relative;
-      display: none;
-      border-radius: 16px;
-      overflow: hidden;
+      width: 100%; display: none;
+      border-radius: 16px; overflow: hidden;
       box-shadow: 0 0 60px rgba(0,229,255,0.15), 0 0 120px rgba(123,97,255,0.1);
-      background: #000;
-      aspect-ratio: 16/9;
+      background: #000; aspect-ratio: 16/9;
       border: 1px solid rgba(0,229,255,0.12);
     }
     #player-box.active { display: block; }
-    #player-box iframe {
-      width: 100%;
-      height: 100%;
-      border: none;
-      display: block;
-    }
+    /* YT API injects a div then an iframe — both must fill the box */
+    #player-box > div { width: 100% !important; height: 100% !important; }
+    #player-box iframe { width: 100% !important; height: 100% !important; border: none !important; }
 
-    /* ── NOW PLAYING ── */
+    /* NOW PLAYING */
     #now-playing {
-      font-size: 0.82rem;
-      color: var(--accent);
-      letter-spacing: 0.05em;
-      min-height: 1.2em;
-      text-align: center;
-      max-width: 100%;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      white-space: nowrap;
-      padding: 0 16px;
-      opacity: 0;
-      transition: opacity 0.4s ease;
+      font-size: 0.82rem; color: var(--accent); letter-spacing: 0.05em;
+      min-height: 1.2em; text-align: center; max-width: 100%;
+      overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+      padding: 0 16px; opacity: 0; transition: opacity 0.4s ease;
     }
     #now-playing.visible { opacity: 1; }
 
-    /* ── CONTROLS ── */
+    /* CONTROLS */
     .controls {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 20px;
-      width: 100%;
+      display: flex; flex-direction: column; align-items: center; gap: 20px; width: 100%;
     }
 
     #mic-btn {
-      position: relative;
-      width: 88px;
-      height: 88px;
-      border-radius: 50%;
-      border: 2px solid rgba(0,229,255,0.3);
-      cursor: pointer;
+      position: relative; width: 88px; height: 88px; border-radius: 50%;
+      border: 2px solid rgba(0,229,255,0.3); cursor: pointer;
       background: linear-gradient(145deg, #00e5ff22, #7b61ff22);
       transition: all 0.3s ease;
-      display: flex;
-      align-items: center;
-      justify-content: center;
+      display: flex; align-items: center; justify-content: center;
     }
     #mic-btn:hover { border-color: var(--accent); box-shadow: var(--glow); }
     #mic-btn.listening {
@@ -235,31 +170,24 @@
       animation: mic-pulse 1s ease-in-out infinite;
     }
     @keyframes mic-pulse {
-      0%, 100% { box-shadow: 0 0 0 0    rgba(255,79,106,0.5); }
-      50%       { box-shadow: 0 0 0 20px rgba(255,79,106,0);   }
+      0%,100% { box-shadow: 0 0 0 0    rgba(255,79,106,0.5); }
+      50%      { box-shadow: 0 0 0 20px rgba(255,79,106,0); }
     }
     #mic-btn .ring {
-      position: absolute;
-      inset: -8px;
-      border-radius: 50%;
-      border: 2px solid var(--danger);
-      opacity: 0;
+      position: absolute; inset: -8px; border-radius: 50%;
+      border: 2px solid var(--danger); opacity: 0;
     }
     #mic-btn.listening .ring:nth-child(1) { animation: ring-out 1.4s ease-out 0s   infinite; }
     #mic-btn.listening .ring:nth-child(2) { animation: ring-out 1.4s ease-out 0.4s infinite; }
     #mic-btn.listening .ring:nth-child(3) { animation: ring-out 1.4s ease-out 0.8s infinite; }
     @keyframes ring-out {
       0%   { inset: -4px;  opacity: 0.6; }
-      100% { inset: -28px; opacity: 0;   }
+      100% { inset: -28px; opacity: 0; }
     }
 
     #waveform {
-      display: flex;
-      align-items: center;
-      gap: 4px;
-      height: 32px;
-      opacity: 0;
-      transition: opacity 0.3s ease;
+      display: flex; align-items: center; gap: 4px;
+      height: 32px; opacity: 0; transition: opacity 0.3s ease;
     }
     #waveform.active { opacity: 1; }
     #waveform .bar { width: 4px; border-radius: 2px; background: var(--danger); }
@@ -275,47 +203,32 @@
     @keyframes wave-bounce { from { height: 4px; } to { height: 28px; } }
 
     #status {
-      font-size: 0.82rem;
-      color: var(--muted);
-      letter-spacing: 0.1em;
-      min-height: 1.2em;
-      text-align: center;
-      transition: color 0.3s ease;
+      font-size: 0.82rem; color: var(--muted);
+      letter-spacing: 0.1em; min-height: 1.2em;
+      text-align: center; transition: color 0.3s ease;
     }
-    #status.listening { color: var(--danger);  }
+    #status.listening { color: var(--danger); }
     #status.searching { color: var(--accent2); }
     #status.playing   { color: var(--success); }
-    #status.error     { color: var(--danger);  }
+    #status.error     { color: var(--danger); }
 
     #transcript {
-      background: var(--card);
-      border: 1px solid rgba(0,229,255,0.1);
-      border-radius: 12px;
-      padding: 10px 20px;
-      font-size: 0.85rem;
-      color: var(--text);
-      min-height: 38px;
-      min-width: 200px;
-      max-width: 100%;
-      text-align: center;
-      opacity: 0;
-      transform: translateY(6px);
-      transition: all 0.3s ease;
-      width: 100%;
+      background: var(--card); border: 1px solid rgba(0,229,255,0.1);
+      border-radius: 12px; padding: 10px 20px;
+      font-size: 0.85rem; color: var(--text);
+      min-height: 38px; min-width: 200px; max-width: 100%;
+      text-align: center; opacity: 0; transform: translateY(6px);
+      transition: all 0.3s ease; width: 100%;
     }
     #transcript.visible { opacity: 1; transform: translateY(0); }
 
-    @media (max-width: 480px) {
-      #player-box { border-radius: 10px; }
-    }
+    @media (max-width: 480px) { #player-box { border-radius: 10px; } }
   </style>
 </head>
 <body>
 
-  <!-- FULLSCREEN BAR -->
   <div id="fs-bar" onclick="enterFullscreen()">⛶ &nbsp;GO FULLSCREEN</div>
 
-  <!-- ACTIVATE OVERLAY -->
   <div id="activate-screen">
     <div class="activate-logo">NKT JustSay</div>
     <p class="activate-sub">Voice → Song → Instant Play</p>
@@ -325,13 +238,11 @@
     <p class="firefox-note">Couldn't make it work on Firefox. Apologies.</p>
   </div>
 
-  <!-- HEADER -->
   <header>
     <h1>NKT JustSay</h1>
     <p>Say a song · It plays</p>
   </header>
 
-  <!-- MAIN -->
   <div id="main">
     <div id="player-box"></div>
     <div id="now-playing"></div>
@@ -343,7 +254,7 @@
         <div class="bar"></div><div class="bar"></div>
       </div>
 
-      <button id="mic-btn" onclick="toggleListen()" title="Start Listening">
+      <button id="mic-btn" onclick="toggleListen()">
         <div class="ring"></div><div class="ring"></div><div class="ring"></div>
         <svg id="mic-icon" width="32" height="32" viewBox="0 0 24 24" fill="none">
           <rect x="9" y="2" width="6" height="11" rx="3" fill="#00e5ff"/>
@@ -358,31 +269,87 @@
     </div>
   </div>
 
+  <script src="https://www.youtube.com/iframe_api"></script>
   <script>
     // ─────────────────────────────────────────────────────────────────────────
-    //  SEARCH METHOD — "ghost browser" approach
+    //  HOW THIS WORKS
     //
-    //  1. Fetch YouTube search HTML through a CORS proxy (raw HTML in memory)
-    //  2. Inject it into a hidden <iframe srcdoc="...">
-    //     → srcdoc iframes are SAME-ORIGIN as the parent page,
-    //       so we can fully read their DOM with contentDocument
-    //  3. Query the iframe's DOM for  a[href*="watch?v="]  links
-    //     → these are the actual video result links YouTube puts in its HTML
-    //  4. Extract the first video ID from the href
-    //  5. Play it in a youtube-nocookie embed (reliable, no YT IFrame API needed)
+    //  The YouTube IFrame API supports search playlists:
+    //    player.loadPlaylist({ listType:'search', list:'query' })
+    //  After the playlist loads (state = CUED), YouTube has already resolved
+    //  the search server-side and player.getPlaylist() returns an array of
+    //  video IDs. We take [0] and call player.loadVideoById(id) — this plays
+    //  the video directly by ID, which always works.
     //
-    //  Three proxies tried in parallel — fastest one wins (Promise.any).
+    //  One single YT player does everything. No proxy. No ghost. No embed URL.
     // ─────────────────────────────────────────────────────────────────────────
 
-    const PROXIES = [
-      q => `https://api.allorigins.win/get?url=${encodeURIComponent(q)}`,
-      q => `https://corsproxy.io/?${encodeURIComponent(q)}`,
-      q => `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(q)}`,
-    ];
+    let sessionActive  = false;
+    let recognition    = null;
+    let isListening    = false;
+    let ytReady        = false;
+    let pendingQuery   = null;
+    let player         = null;
+    let playerReady    = false;
+    let searchMode     = false;   // true while resolving a search playlist
 
-    let sessionActive = false;
-    let recognition   = null;
-    let isListening   = false;
+    // ── YT API READY ─────────────────────────────────────────────────────────
+    function onYouTubeIframeAPIReady() {
+      ytReady = true;
+
+      // Create the single player now (invisible until first song)
+      const box = document.getElementById('player-box');
+      const div = document.createElement('div');
+      box.appendChild(div);
+
+      player = new YT.Player(div, {
+        width:  '100%',
+        height: '100%',
+        playerVars: {
+          autoplay:       0,
+          controls:       1,
+          rel:            0,
+          modestbranding: 1,
+          playsinline:    1,
+          origin:         location.origin,
+        },
+        events: {
+          onReady() {
+            playerReady = true;
+            if (pendingQuery) {
+              const q = pendingQuery; pendingQuery = null;
+              runSearch(q);
+            }
+          },
+          onStateChange(e) {
+            if (!searchMode) return;
+
+            // CUED (-1): playlist has loaded — IDs are available
+            if (e.data === YT.PlayerState.CUED) {
+              const ids = player.getPlaylist();
+              if (ids && ids.length > 0) {
+                searchMode = false;
+                playFirstResult(ids[0]);
+              }
+            }
+
+            // UNSTARTED (−1 in some browsers) or BUFFERING — try getPlaylist too
+            if (e.data === YT.PlayerState.BUFFERING || e.data === 3) {
+              const ids = player.getPlaylist();
+              if (ids && ids.length > 0) {
+                searchMode = false;
+                playFirstResult(ids[0]);
+              }
+            }
+          },
+          onError(e) {
+            console.error('YT error', e.data);
+            searchMode = false;
+            setStatus('Nothing found — try again', 'error');
+          },
+        },
+      });
+    }
 
     // ── SESSION ──────────────────────────────────────────────────────────────
     function activateSession() {
@@ -438,156 +405,63 @@
       catch (err) { setStatus('Could not start mic: ' + err.message, 'error'); }
     }
 
-    // ── SEARCH ───────────────────────────────────────────────────────────────
-    async function handleQuery(query) {
+    // ── QUERY → SEARCH → PLAY ─────────────────────────────────────────────────
+    function handleQuery(query) {
       if (!query) return;
       setStatus('Searching…', 'searching');
-      try {
-        const { videoId, title } = await ghostBrowserSearch(query);
-        playVideo(videoId, title || query);
-      } catch (err) {
-        console.error(err);
-        setStatus('Nothing found — try again', 'error');
+
+      if (!ytReady || !playerReady) {
+        pendingQuery = query; return;
       }
+      runSearch(query);
     }
 
-    async function ghostBrowserSearch(query) {
-      const ytUrl = `https://www.youtube.com/results?search_query=${encodeURIComponent(query + ' song official')}`;
+    function runSearch(query) {
+      searchMode = true;
 
-      // Fire all proxies at once, take the first one that returns usable HTML
-      const html = await Promise.any(
-        PROXIES.map(p => fetchHtml(p(ytUrl)))
-      );
-
-      return parseWithGhostIframe(html);
-    }
-
-    // Fetch via proxy and return raw YouTube HTML string
-    async function fetchHtml(proxyUrl) {
-      const ctrl = new AbortController();
-      const timer = setTimeout(() => ctrl.abort(), 12000);
-      try {
-        const res = await fetch(proxyUrl, { signal: ctrl.signal });
-        clearTimeout(timer);
-        if (!res.ok) throw new Error('HTTP ' + res.status);
-
-        const ct = res.headers.get('content-type') || '';
-        if (ct.includes('application/json')) {
-          const j = await res.json();
-          const html = j.contents || j.body || '';
-          if (html.length < 500) throw new Error('Empty response');
-          return html;
-        }
-        const text = await res.text();
-        if (text.length < 500) throw new Error('Empty response');
-        return text;
-      } catch(e) {
-        clearTimeout(timer);
-        throw e;
-      }
-    }
-
-    // Inject YouTube HTML into a hidden srcdoc iframe and read its DOM
-    function parseWithGhostIframe(html) {
-      return new Promise((resolve, reject) => {
-        const frame = document.createElement('iframe');
-        frame.style.cssText = 'position:fixed;width:1px;height:1px;opacity:0;left:-9999px;top:-9999px;pointer-events:none;';
-        frame.sandbox = 'allow-same-origin'; // read DOM but block scripts/network
-
-        const timer = setTimeout(() => {
-          frame.remove();
-          reject(new Error('iframe parse timeout'));
-        }, 8000);
-
-        frame.onload = () => {
-          clearTimeout(timer);
-          try {
-            const doc = frame.contentDocument;
-
-            // ── Strategy 1: find <a href="/watch?v=ID"> links in the DOM ──
-            const links = doc.querySelectorAll('a[href*="/watch?v="]');
-            for (const link of links) {
-              const href = link.getAttribute('href') || '';
-              const id   = extractVideoId(href);
-              if (id && id.length === 11) {
-                // Try to get a title from the link text or aria-label
-                const title = link.getAttribute('aria-label')
-                           || link.textContent.trim().slice(0, 100)
-                           || null;
-                frame.remove();
-                resolve({ videoId: id, title: cleanTitle(title) });
-                return;
-              }
-            }
-
-            // ── Strategy 2: YouTube bakes data as JSON in the HTML ──
-            const bodyText = doc.body ? doc.body.innerHTML : '';
-            const idMatch = bodyText.match(/"videoId":"([a-zA-Z0-9_-]{11})"/);
-            if (idMatch) {
-              // Try to grab title too
-              const titleMatch = bodyText.match(/"title":\{"runs":\[\{"text":"([^"]{3,100})"/);
-              const title = titleMatch ? titleMatch[1] : null;
-              frame.remove();
-              resolve({ videoId: idMatch[1], title: cleanTitle(title) });
-              return;
-            }
-
-            frame.remove();
-            reject(new Error('No video found in parsed HTML'));
-          } catch (err) {
-            frame.remove();
-            reject(err);
-          }
-        };
-
-        frame.onerror = () => {
-          clearTimeout(timer);
-          frame.remove();
-          reject(new Error('iframe load error'));
-        };
-
-        // srcdoc = same-origin → contentDocument is fully readable
-        frame.srcdoc = html;
-        document.body.appendChild(frame);
+      // loadPlaylist with listType:'search' sends the query to YouTube
+      // YouTube resolves it server-side and returns a list of video IDs
+      player.loadPlaylist({
+        listType: 'search',
+        list:     query + ' song official',
+        index:    0,
       });
+
+      // Safety timeout
+      setTimeout(() => {
+        if (!searchMode) return;
+        searchMode = false;
+
+        // Last attempt: maybe playlist is already populated
+        try {
+          const ids = player.getPlaylist();
+          if (ids && ids.length > 0) { playFirstResult(ids[0]); return; }
+        } catch(_) {}
+
+        setStatus('Nothing found — try again', 'error');
+      }, 10000);
     }
 
-    function extractVideoId(href) {
-      try {
-        // href is like /watch?v=dQw4w9WgXcQ or /watch?v=ID&list=...
-        const url = new URL(href, 'https://www.youtube.com');
-        return url.searchParams.get('v');
-      } catch (_) {
-        const m = href.match(/[?&]v=([a-zA-Z0-9_-]{11})/);
-        return m ? m[1] : null;
-      }
-    }
+    function playFirstResult(videoId) {
+      // Load the video directly by ID — this bypasses the
+      // "unavailable in search context" restriction completely
+      player.loadVideoById({ videoId, suggestedQuality: 'hd720' });
 
-    function cleanTitle(t) {
-      if (!t) return null;
-      return t
-        .replace(/\\u0026/g, '&').replace(/\\u003c/g, '<')
-        .replace(/\\u003e/g, '>').replace(/\\"/g, '"')
-        .replace(/\\\//g, '/').trim();
-    }
+      // Show the player box
+      document.getElementById('player-box').classList.add('active');
 
-    // ── PLAY VIDEO ───────────────────────────────────────────────────────────
-    function playVideo(videoId, title) {
-      const box = document.getElementById('player-box');
-      const old = box.querySelector('iframe');
-      if (old) old.remove();
+      // Read title after a short delay (title populates after loadVideoById)
+      setTimeout(() => {
+        try {
+          const data  = player.getVideoData();
+          const title = data && data.title ? data.title : videoId;
+          setStatus('Now playing', 'playing');
+          showNowPlaying(title);
+        } catch(_) {
+          setStatus('Now playing', 'playing');
+        }
+      }, 800);
 
-      const iframe           = document.createElement('iframe');
-      iframe.src             = `https://www.youtube-nocookie.com/embed/${videoId}?autoplay=1&rel=0&modestbranding=1&playsinline=1`;
-      iframe.allow           = 'autoplay; fullscreen; picture-in-picture';
-      iframe.allowFullscreen = true;
-      iframe.title           = title;
-
-      box.appendChild(iframe);
-      box.classList.add('active');
-
-      setStatus('Now playing', 'playing');
-      showNowPlaying(title);
       showTranscript('', false);
     }
 
@@ -603,7 +477,6 @@
                    || document.mozFullScreenElement || document.msFullscreenElement);
       document.getElementById('fs-bar').classList.toggle('hidden', inFS);
     }
-
     ['fullscreenchange','webkitfullscreenchange','mozfullscreenchange','MSFullscreenChange']
       .forEach(ev => document.addEventListener(ev, onFSChange));
 
@@ -636,8 +509,7 @@
     }
     function showNowPlaying(title) {
       const el = document.getElementById('now-playing');
-      el.textContent = '▶ ' + title;
-      el.classList.add('visible');
+      el.textContent = '▶ ' + title; el.classList.add('visible');
     }
 
     document.addEventListener('keydown', (e) => {
