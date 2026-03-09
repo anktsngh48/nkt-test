@@ -10,7 +10,6 @@
 
     :root {
       --bg: #05080f;
-      --surface: #0c1220;
       --card: #111827;
       --accent: #00e5ff;
       --accent2: #7b61ff;
@@ -18,7 +17,7 @@
       --muted: #5a6a82;
       --danger: #ff4f6a;
       --success: #00e5a0;
-      --glow: 0 0 30px rgba(0, 229, 255, 0.35);
+      --glow: 0 0 30px rgba(0,229,255,0.35);
     }
 
     html, body {
@@ -29,7 +28,6 @@
       overflow-x: hidden;
     }
 
-    /* ───── BACKGROUND MESH ───── */
     body::before {
       content: '';
       position: fixed;
@@ -41,7 +39,7 @@
       z-index: 0;
     }
 
-    /* ───── HEADER ───── */
+    /* ── HEADER ── */
     header {
       position: relative;
       z-index: 10;
@@ -59,7 +57,6 @@
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
       background-clip: text;
-      text-shadow: none;
       filter: drop-shadow(0 0 20px rgba(0,229,255,0.4));
     }
 
@@ -71,7 +68,7 @@
       margin-top: 4px;
     }
 
-    /* ───── ACTIVATE OVERLAY ───── */
+    /* ── ACTIVATE OVERLAY ── */
     #activate-screen {
       position: fixed;
       inset: 0;
@@ -104,7 +101,7 @@
 
     @keyframes pulse-glow {
       0%, 100% { filter: drop-shadow(0 0 25px rgba(0,229,255,0.5)); }
-      50% { filter: drop-shadow(0 0 40px rgba(0,229,255,0.9)); }
+      50%       { filter: drop-shadow(0 0 40px rgba(0,229,255,0.9)); }
     }
 
     .activate-sub {
@@ -138,14 +135,11 @@
       transition: opacity 0.25s ease;
     }
 
-    #tap-btn:hover {
-      box-shadow: 0 0 40px rgba(0,229,255,0.4);
-      color: var(--bg);
-    }
+    #tap-btn:hover { box-shadow: 0 0 40px rgba(0,229,255,0.4); color: var(--bg); }
     #tap-btn:hover::before { opacity: 1; }
     #tap-btn span { position: relative; z-index: 1; }
 
-    /* ───── MAIN CONTENT ───── */
+    /* ── MAIN ── */
     #main {
       position: relative;
       z-index: 1;
@@ -158,7 +152,7 @@
       gap: 24px;
     }
 
-    /* ───── VIDEO AREA ───── */
+    /* ── VIDEO WRAP — hidden until first song ── */
     #video-wrap {
       width: 100%;
       border-radius: 16px;
@@ -166,14 +160,13 @@
       border: 1px solid rgba(0,229,255,0.12);
       background: var(--card);
       aspect-ratio: 16/9;
-      display: flex;
-      align-items: center;
-      justify-content: center;
       position: relative;
       transition: box-shadow 0.4s ease;
+      display: none;
     }
 
     #video-wrap.active {
+      display: block;
       box-shadow: 0 0 60px rgba(0,229,255,0.15), 0 0 120px rgba(123,97,255,0.1);
     }
 
@@ -184,26 +177,7 @@
       display: block;
     }
 
-    .video-placeholder {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 12px;
-      color: var(--muted);
-      padding: 20px;
-      text-align: center;
-    }
-
-    .video-placeholder svg {
-      opacity: 0.3;
-    }
-
-    .video-placeholder p {
-      font-size: 0.85rem;
-      letter-spacing: 0.05em;
-    }
-
-    /* ───── NOW PLAYING ───── */
+    /* ── NOW PLAYING ── */
     #now-playing {
       font-size: 0.8rem;
       color: var(--accent);
@@ -220,7 +194,7 @@
     }
     #now-playing.visible { opacity: 1; }
 
-    /* ───── CONTROLS ───── */
+    /* ── CONTROLS ── */
     .controls {
       display: flex;
       flex-direction: column;
@@ -229,26 +203,21 @@
       width: 100%;
     }
 
-    /* MIC BUTTON */
     #mic-btn {
       position: relative;
       width: 88px;
       height: 88px;
       border-radius: 50%;
-      border: none;
+      border: 2px solid rgba(0,229,255,0.3);
       cursor: pointer;
       background: linear-gradient(145deg, #00e5ff22, #7b61ff22);
-      border: 2px solid rgba(0,229,255,0.3);
       transition: all 0.3s ease;
       display: flex;
       align-items: center;
       justify-content: center;
     }
 
-    #mic-btn:hover {
-      border-color: var(--accent);
-      box-shadow: var(--glow);
-    }
+    #mic-btn:hover { border-color: var(--accent); box-shadow: var(--glow); }
 
     #mic-btn.listening {
       border-color: var(--danger);
@@ -257,53 +226,30 @@
     }
 
     @keyframes mic-pulse {
-      0%, 100% { box-shadow: 0 0 0 0 rgba(255,79,106,0.5); }
-      50% { box-shadow: 0 0 0 20px rgba(255,79,106,0); }
+      0%, 100% { box-shadow: 0 0 0 0    rgba(255,79,106,0.5); }
+      50%       { box-shadow: 0 0 0 20px rgba(255,79,106,0);   }
     }
 
-    #mic-btn svg { transition: all 0.3s ease; }
-
-    /* WAVEFORM RINGS */
     #mic-btn .ring {
       position: absolute;
       inset: -8px;
       border-radius: 50%;
       border: 2px solid var(--danger);
       opacity: 0;
-      animation: none;
     }
 
-    #mic-btn.listening .ring:nth-child(1) {
-      animation: ring-out 1.4s ease-out infinite;
-    }
-    #mic-btn.listening .ring:nth-child(2) {
-      animation: ring-out 1.4s ease-out 0.4s infinite;
-    }
-    #mic-btn.listening .ring:nth-child(3) {
-      animation: ring-out 1.4s ease-out 0.8s infinite;
-    }
+    #mic-btn.listening .ring:nth-child(1) { animation: ring-out 1.4s ease-out 0s   infinite; }
+    #mic-btn.listening .ring:nth-child(2) { animation: ring-out 1.4s ease-out 0.4s infinite; }
+    #mic-btn.listening .ring:nth-child(3) { animation: ring-out 1.4s ease-out 0.8s infinite; }
 
     @keyframes ring-out {
-      0% { inset: -4px; opacity: 0.6; }
-      100% { inset: -28px; opacity: 0; }
+      0%   { inset: -4px;  opacity: 0.6; }
+      100% { inset: -28px; opacity: 0;   }
     }
 
-    /* STATUS */
-    #status {
-      font-size: 0.82rem;
-      color: var(--muted);
-      letter-spacing: 0.1em;
-      min-height: 1.2em;
-      text-align: center;
-      transition: color 0.3s ease;
-    }
+    #mic-btn svg { transition: all 0.3s ease; }
 
-    #status.listening { color: var(--danger); }
-    #status.searching { color: var(--accent2); }
-    #status.playing { color: var(--success); }
-    #status.error { color: var(--danger); }
-
-    /* WAVEFORM BARS (visual effect when listening) */
+    /* WAVEFORM */
     #waveform {
       display: flex;
       align-items: center;
@@ -318,28 +264,36 @@
       width: 4px;
       border-radius: 2px;
       background: var(--danger);
-      animation: none;
     }
 
-    #waveform.active .bar {
-      animation: wave-bounce 0.8s ease-in-out infinite alternate;
-    }
-
-    #waveform .bar:nth-child(1) { animation-delay: 0s; }
-    #waveform .bar:nth-child(2) { animation-delay: 0.1s; }
-    #waveform .bar:nth-child(3) { animation-delay: 0.2s; }
+    #waveform.active .bar { animation: wave-bounce 0.8s ease-in-out infinite alternate; }
+    #waveform .bar:nth-child(1) { animation-delay: 0s;    }
+    #waveform .bar:nth-child(2) { animation-delay: 0.1s;  }
+    #waveform .bar:nth-child(3) { animation-delay: 0.2s;  }
     #waveform .bar:nth-child(4) { animation-delay: 0.05s; }
     #waveform .bar:nth-child(5) { animation-delay: 0.15s; }
     #waveform .bar:nth-child(6) { animation-delay: 0.25s; }
-    #waveform .bar:nth-child(7) { animation-delay: 0.0s; }
+    #waveform .bar:nth-child(7) { animation-delay: 0s;    }
     #waveform .bar:nth-child(8) { animation-delay: 0.12s; }
 
     @keyframes wave-bounce {
-      from { height: 4px; }
-      to { height: 28px; }
+      from { height: 4px;  }
+      to   { height: 28px; }
     }
 
-    /* TRANSCRIPT BUBBLE */
+    #status {
+      font-size: 0.82rem;
+      color: var(--muted);
+      letter-spacing: 0.1em;
+      min-height: 1.2em;
+      text-align: center;
+      transition: color 0.3s ease;
+    }
+    #status.listening { color: var(--danger);  }
+    #status.searching { color: var(--accent2); }
+    #status.playing   { color: var(--success); }
+    #status.error     { color: var(--danger);  }
+
     #transcript {
       background: var(--card);
       border: 1px solid rgba(0,229,255,0.1);
@@ -356,21 +310,8 @@
       transition: all 0.3s ease;
       width: 100%;
     }
-    #transcript.visible {
-      opacity: 1;
-      transform: translateY(0);
-    }
+    #transcript.visible { opacity: 1; transform: translateY(0); }
 
-    /* NOTICE */
-    .notice {
-      font-size: 0.72rem;
-      color: var(--muted);
-      text-align: center;
-      opacity: 0.6;
-      line-height: 1.5;
-    }
-
-    /* ───── RESPONSIVE ───── */
     @media (max-width: 480px) {
       #video-wrap { border-radius: 10px; }
     }
@@ -378,40 +319,31 @@
 </head>
 <body>
 
-  <!-- ── ACTIVATE OVERLAY ── -->
+  <!-- ACTIVATE OVERLAY -->
   <div id="activate-screen">
     <div class="activate-logo">NKT JustSay</div>
     <p class="activate-sub">Voice → Song → Instant Play</p>
     <button id="tap-btn" onclick="activateSession()">
-      <span>▶ &nbsp;TAP TO START SESSION</span>
+      <span>▶ &nbsp;LET ME IN</span>
     </button>
-    <p class="notice">Required once to enable unmuted autoplay</p>
   </div>
 
-  <!-- ── HEADER ── -->
+  <!-- HEADER -->
   <header>
     <h1>NKT JustSay</h1>
     <p>Say a song · It plays</p>
   </header>
 
-  <!-- ── MAIN ── -->
+  <!-- MAIN -->
   <div id="main">
 
-    <!-- VIDEO PLAYER -->
-    <div id="video-wrap">
-      <div class="video-placeholder" id="placeholder">
-        <svg width="64" height="64" viewBox="0 0 64 64" fill="none">
-          <circle cx="32" cy="32" r="30" stroke="#00e5ff" stroke-width="1.5"/>
-          <path d="M26 22 L46 32 L26 42 Z" fill="#00e5ff"/>
-        </svg>
-        <p>Say a song name to begin</p>
-      </div>
-    </div>
+    <!-- Video panel — hidden until first song loads -->
+    <div id="video-wrap"></div>
 
-    <!-- NOW PLAYING -->
+    <!-- Now playing label -->
     <div id="now-playing"></div>
 
-    <!-- CONTROLS -->
+    <!-- Controls -->
     <div class="controls">
       <div id="waveform">
         <div class="bar"></div><div class="bar"></div><div class="bar"></div>
@@ -435,44 +367,44 @@
       <div id="transcript"></div>
     </div>
 
-    <p class="notice">Ad-free · Powered by open video infrastructure · Requires HTTPS</p>
   </div>
 
   <script>
-    // ─── CONFIG ───────────────────────────────────────────────
-    // Invidious instances (tried in order until one works)
+    // ── INVIDIOUS INSTANCES (tried in order, first working one wins) ─────────
     const INVIDIOUS = [
-      'https://inv.tux.pizza',
+      'https://invidious.lunar.icu',
+      'https://inv.nadeko.net',
       'https://yewtu.be',
       'https://invidious.privacydev.net',
       'https://invidious.nerdvpn.de',
-      'https://vid.puffyan.us',
+      'https://iv.ggtyler.dev',
+      'https://invidious.io',
     ];
 
     let sessionActive = false;
-    let recognition = null;
-    let isListening = false;
+    let recognition   = null;
+    let isListening   = false;
 
-    // ─── SESSION ACTIVATE ─────────────────────────────────────
+    // ── SESSION ACTIVATE ──────────────────────────────────────────────────────
     function activateSession() {
       sessionActive = true;
-      document.getElementById('activate-screen').classList.add('hidden');
-      setTimeout(() => {
-        document.getElementById('activate-screen').style.display = 'none';
-      }, 500);
+      const s = document.getElementById('activate-screen');
+      s.classList.add('hidden');
+      setTimeout(() => s.style.display = 'none', 500);
     }
 
-    // ─── SPEECH RECOGNITION ───────────────────────────────────
+    // ── SPEECH RECOGNITION ───────────────────────────────────────────────────
     function setupRecognition() {
-      const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-      if (!SpeechRecognition) {
-        setStatus('Speech recognition not supported in this browser', 'error');
+      const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+      if (!SR) {
+        setStatus('Speech recognition not supported — use Chrome or Edge', 'error');
         return null;
       }
-      const r = new SpeechRecognition();
-      r.lang = 'en-US';
-      r.continuous = false;
-      r.interimResults = true;
+
+      const r         = new SR();
+      r.lang            = 'en-US';
+      r.continuous      = false;
+      r.interimResults  = true;
       r.maxAlternatives = 1;
 
       r.onstart = () => {
@@ -483,8 +415,7 @@
       };
 
       r.onresult = (e) => {
-        const interim = Array.from(e.results)
-          .map(r => r[0].transcript).join('');
+        const interim = Array.from(e.results).map(x => x[0].transcript).join('');
         showTranscript(interim, true);
 
         if (e.results[e.results.length - 1].isFinal) {
@@ -497,119 +428,102 @@
       r.onerror = (e) => {
         isListening = false;
         setMicState(false);
-        if (e.error === 'no-speech') {
-          setStatus('No speech detected. Try again.', 'error');
-        } else if (e.error === 'not-allowed') {
-          setStatus('Microphone access denied. Check browser permissions.', 'error');
-        } else {
-          setStatus(`Error: ${e.error}`, 'error');
-        }
+        const msgs = {
+          'no-speech':   'No speech detected — try again',
+          'not-allowed': 'Microphone blocked — allow access in browser settings',
+          'network':     'Network error during recognition',
+        };
+        setStatus(msgs[e.error] || `Mic error: ${e.error}`, 'error');
       };
 
-      r.onend = () => {
-        isListening = false;
-        setMicState(false);
-      };
+      r.onend = () => { isListening = false; setMicState(false); };
 
       return r;
     }
 
     function toggleListen() {
-      if (!sessionActive) {
-        setStatus('Please tap "TAP TO START SESSION" first', 'error');
-        return;
-      }
-
-      if (isListening) {
-        if (recognition) recognition.stop();
-        return;
-      }
-
+      if (!sessionActive) return;
+      if (isListening) { recognition && recognition.stop(); return; }
       recognition = setupRecognition();
       if (!recognition) return;
+      try { recognition.start(); }
+      catch (err) { setStatus('Could not start mic: ' + err.message, 'error'); }
+    }
 
+    // ── SEARCH ───────────────────────────────────────────────────────────────
+    async function handleQuery(query) {
+      if (!query) return;
+      setStatus(`Searching for "${query}"…`, 'searching');
       try {
-        recognition.start();
+        const result = await searchVideo(query);
+        playVideo(result.videoId, result.title, result.instance);
       } catch (err) {
-        setStatus('Could not start microphone: ' + err.message, 'error');
+        console.error(err);
+        setStatus('Could not reach search servers — check your connection', 'error');
       }
     }
 
-    // ─── SEARCH & PLAY ────────────────────────────────────────
-    async function handleQuery(query) {
-      if (!query) return;
-      setStatus(`Searching: "${query}"`, 'searching');
-
-      try {
-        const { videoId, title, instance } = await searchVideo(query);
-        playVideo(videoId, title, instance);
-      } catch (err) {
-        setStatus('Search failed. Check connection or try again.', 'error');
-        console.error(err);
-      }
+    // AbortController timeout — works in all browsers (unlike AbortSignal.timeout)
+    function fetchWithTimeout(url, ms) {
+      const ctrl = new AbortController();
+      const id   = setTimeout(() => ctrl.abort(), ms);
+      return fetch(url, { signal: ctrl.signal })
+        .then(res  => { clearTimeout(id); return res; })
+        .catch(err => { clearTimeout(id); throw err;  });
     }
 
     async function searchVideo(query) {
+      const path = `/api/v1/search?q=${encodeURIComponent(query)}&type=video&page=1`;
+
       for (const instance of INVIDIOUS) {
         try {
-          const url = `${instance}/api/v1/search?q=${encodeURIComponent(query)}&type=video&fields=videoId,title&page=1`;
-          const resp = await fetch(url, { signal: AbortSignal.timeout(6000) });
-          if (!resp.ok) continue;
-          const data = await resp.json();
+          const res = await fetchWithTimeout(instance + path, 7000);
+          if (!res.ok) { console.warn(instance, res.status); continue; }
+          const data = await res.json();
           if (Array.isArray(data) && data.length > 0) {
-            return {
-              videoId: data[0].videoId,
-              title: data[0].title,
-              instance
-            };
+            return { videoId: data[0].videoId, title: data[0].title, instance };
           }
         } catch (e) {
-          console.warn(`Instance ${instance} failed:`, e.message);
+          console.warn(`${instance} failed:`, e.message);
         }
       }
       throw new Error('All Invidious instances failed');
     }
 
+    // ── PLAY VIDEO ───────────────────────────────────────────────────────────
     function playVideo(videoId, title, instance) {
       const wrap = document.getElementById('video-wrap');
-      const placeholder = document.getElementById('placeholder');
 
-      // Remove old iframe
       const old = wrap.querySelector('iframe');
       if (old) old.remove();
 
-      // Build embed URL — Invidious embed is ad-free
-      const embedUrl = `${instance}/embed/${videoId}?autoplay=1&listen=0&quality=hd720`;
-
+      // Invidious embed strips all ads
       const iframe = document.createElement('iframe');
-      iframe.src = embedUrl;
-      iframe.allow = 'autoplay; fullscreen; picture-in-picture';
+      iframe.src             = `${instance}/embed/${videoId}?autoplay=1&listen=0&quality=hd720`;
+      iframe.allow           = 'autoplay; fullscreen; picture-in-picture';
       iframe.allowFullscreen = true;
-      iframe.title = title || 'Video';
+      iframe.title           = title || 'Video';
 
-      if (placeholder) placeholder.style.display = 'none';
       wrap.appendChild(iframe);
-      wrap.classList.add('active');
+      wrap.classList.add('active');     // shows the video panel for the first time
 
       setStatus('Now playing', 'playing');
       showNowPlaying(title || videoId);
       showTranscript('', false);
     }
 
-    // ─── UI HELPERS ───────────────────────────────────────────
-    function setMicState(active) {
-      const btn = document.getElementById('mic-btn');
+    // ── UI HELPERS ───────────────────────────────────────────────────────────
+    function setMicState(on) {
+      const btn  = document.getElementById('mic-btn');
       const icon = document.getElementById('mic-icon');
       const wave = document.getElementById('waveform');
 
-      if (active) {
+      if (on) {
         btn.classList.add('listening');
         wave.classList.add('active');
-        // Switch to stop icon
         icon.innerHTML = `
           <rect x="8" y="8" width="8" height="8" rx="2" fill="#ff4f6a"/>
-          <circle cx="12" cy="12" r="10" stroke="#ff4f6a" stroke-width="2"/>
-        `;
+          <circle cx="12" cy="12" r="10" stroke="#ff4f6a" stroke-width="2"/>`;
       } else {
         btn.classList.remove('listening');
         wave.classList.remove('active');
@@ -617,26 +531,20 @@
           <rect x="9" y="2" width="6" height="11" rx="3" fill="#00e5ff"/>
           <path d="M5 10a7 7 0 0 0 14 0" stroke="#00e5ff" stroke-width="2" stroke-linecap="round"/>
           <line x1="12" y1="17" x2="12" y2="21" stroke="#00e5ff" stroke-width="2" stroke-linecap="round"/>
-          <line x1="9" y1="21" x2="15" y2="21" stroke="#00e5ff" stroke-width="2" stroke-linecap="round"/>
-        `;
+          <line x1="9" y1="21" x2="15" y2="21" stroke="#00e5ff" stroke-width="2" stroke-linecap="round"/>`;
       }
     }
 
     function setStatus(msg, type = '') {
       const el = document.getElementById('status');
       el.textContent = msg;
-      el.className = type;
+      el.className   = type;
     }
 
     function showTranscript(text, show) {
       const el = document.getElementById('transcript');
-      if (show) {
-        el.classList.add('visible');
-        el.textContent = text || '…';
-      } else {
-        el.classList.remove('visible');
-        el.textContent = '';
-      }
+      if (show) { el.classList.add('visible'); el.textContent = text || '…'; }
+      else       { el.classList.remove('visible'); el.textContent = ''; }
     }
 
     function showNowPlaying(title) {
@@ -645,7 +553,7 @@
       el.classList.add('visible');
     }
 
-    // ─── KEYBOARD SHORTCUT ────────────────────────────────────
+    // Spacebar shortcut
     document.addEventListener('keydown', (e) => {
       if (e.code === 'Space' && e.target.tagName !== 'BUTTON') {
         e.preventDefault();
