@@ -39,6 +39,30 @@
       z-index: 0;
     }
 
+    /* ── FULLSCREEN BAR ── */
+    #fs-bar {
+      position: relative;
+      z-index: 20;
+      width: 100%;
+      text-align: center;
+      padding: 8px 20px;
+      font-family: 'Orbitron', sans-serif;
+      font-size: 0.7rem;
+      font-weight: 700;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--accent);
+      background: rgba(0, 229, 255, 0.04);
+      border-bottom: 1px solid rgba(0, 229, 255, 0.1);
+      cursor: pointer;
+      transition: background 0.2s, color 0.2s;
+      user-select: none;
+    }
+    #fs-bar:hover {
+      background: rgba(0, 229, 255, 0.09);
+    }
+    #fs-bar.hidden { display: none; }
+
     /* ── HEADER ── */
     header {
       position: relative;
@@ -46,15 +70,6 @@
       text-align: center;
       padding: 22px 20px 12px;
       border-bottom: 1px solid rgba(0,229,255,0.08);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-    header .header-inner {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 4px;
     }
     header h1 {
       font-family: 'Orbitron', sans-serif;
@@ -72,33 +87,8 @@
       color: var(--muted);
       letter-spacing: 0.2em;
       text-transform: uppercase;
+      margin-top: 4px;
     }
-
-    /* Fullscreen button — top right of header */
-    #page-fs-btn {
-      position: absolute;
-      right: 20px;
-      top: 50%;
-      transform: translateY(-50%);
-      width: 40px;
-      height: 40px;
-      border-radius: 10px;
-      background: rgba(0,229,255,0.06);
-      border: 1.5px solid rgba(0,229,255,0.3);
-      color: var(--accent);
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      transition: background 0.2s, border-color 0.2s, transform 0.15s;
-    }
-    #page-fs-btn:hover {
-      background: rgba(0,229,255,0.15);
-      border-color: var(--accent);
-      transform: translateY(-50%) scale(1.08);
-    }
-    #page-fs-btn:active { transform: translateY(-50%) scale(0.94); }
-    #page-fs-btn svg { pointer-events: none; }
 
     /* ── ACTIVATE OVERLAY ── */
     #activate-screen {
@@ -131,13 +121,6 @@
       50%       { filter: drop-shadow(0 0 40px rgba(0,229,255,0.9)); }
     }
     .activate-sub { color: var(--muted); font-size: 0.9rem; letter-spacing: 0.08em; }
-    .firefox-note {
-      font-size: 0.72rem;
-      color: rgba(255, 79, 106, 0.6);
-      text-align: center;
-      max-width: 300px;
-      line-height: 1.7;
-    }
 
     #tap-btn {
       position: relative;
@@ -166,6 +149,17 @@
     #tap-btn:hover::before { opacity: 1; }
     #tap-btn span { position: relative; z-index: 1; }
 
+    /* Firefox note — themed, at the bottom of the overlay */
+    .firefox-note {
+      position: absolute;
+      bottom: 28px;
+      left: 0; right: 0;
+      text-align: center;
+      font-size: 0.72rem;
+      color: rgba(0, 229, 255, 0.35);
+      letter-spacing: 0.06em;
+    }
+
     /* ── MAIN ── */
     #main {
       position: relative;
@@ -192,13 +186,12 @@
       border: 1px solid rgba(0,229,255,0.12);
     }
     #player-box.active { display: block; }
+    /* YT iframe API injects an iframe child — make it fill the box */
+    #player-box > div,
     #player-box iframe {
-      width: 100%;
-      height: 100%;
-      border: none;
-      display: block;
-      position: absolute;
-      inset: 0;
+      width: 100% !important;
+      height: 100% !important;
+      border: none !important;
     }
 
     /* ── NOW PLAYING ── */
@@ -319,11 +312,13 @@
 
     @media (max-width: 480px) {
       #player-box { border-radius: 10px; }
-      #page-fs-btn { right: 12px; }
     }
   </style>
 </head>
 <body>
+
+  <!-- ── FULLSCREEN BAR (top of page, hidden when in fullscreen) ── -->
+  <div id="fs-bar" onclick="enterFullscreen()">⛶ &nbsp;GO FULLSCREEN</div>
 
   <!-- ── ACTIVATE OVERLAY ── -->
   <div id="activate-screen">
@@ -337,29 +332,14 @@
 
   <!-- ── HEADER ── -->
   <header>
-    <div class="header-inner">
-      <h1>NKT JustSay</h1>
-      <p>Say a song · It plays</p>
-    </div>
-    <!-- Fullscreen entire page -->
-    <button id="page-fs-btn" onclick="togglePageFullscreen()" title="Fullscreen">
-      <svg id="page-fs-icon" width="18" height="18" viewBox="0 0 24 24" fill="none"
-           stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-        <polyline points="15 3 21 3 21 9"/>
-        <polyline points="9 21 3 21 3 15"/>
-        <line x1="21" y1="3" x2="14" y2="10"/>
-        <line x1="3"  y1="21" x2="10" y2="14"/>
-      </svg>
-    </button>
+    <h1>NKT JustSay</h1>
+    <p>Say a song · It plays</p>
   </header>
 
   <!-- ── MAIN ── -->
   <div id="main">
 
-    <div id="player-box">
-      <!-- YouTube player injected here -->
-    </div>
-
+    <div id="player-box"></div>
     <div id="now-playing"></div>
 
     <div class="controls">
@@ -385,31 +365,25 @@
 
   </div>
 
-  <!-- YouTube IFrame API (loaded once, used for hidden search + main player) -->
   <script src="https://www.youtube.com/iframe_api"></script>
-
   <script>
     // ─────────────────────────────────────────────────────────────────────────
-    //  HOW SEARCH WORKS — no proxies, no API keys, no accounts
-    //
-    //  1. Create a hidden 1×1px YouTube player with listType=search
-    //     YouTube resolves the search internally and loads the first result
-    //  2. Once the hidden player fires onReady, call getVideoData()
-    //     which returns { video_id, title } — the actual ID of the top result
-    //  3. Destroy the hidden player, create the real visible player with
-    //     that video ID and autoplay=1
-    //
-    //  All YouTube infrastructure — fast, reliable, no third parties.
+    //  SEARCH FLOW:
+    //  1. Create invisible 1px YT player with listType=search
+    //  2. Wait for onStateChange → YT.PlayerState.CUED (-1)
+    //     That's when YouTube has resolved the search & loaded the first result
+    //  3. Call getVideoData() → get real videoId + title
+    //  4. Destroy ghost, create real player with that videoId + autoplay
     // ─────────────────────────────────────────────────────────────────────────
 
-    let sessionActive  = false;
-    let recognition    = null;
-    let isListening    = false;
-    let ytAPIReady     = false;
-    let pendingQuery   = null;
-    let mainPlayer     = null;
+    let sessionActive = false;
+    let recognition   = null;
+    let isListening   = false;
+    let ytAPIReady    = false;
+    let pendingQuery  = null;
+    let mainPlayer    = null;
 
-    // ── YouTube API ready callback ────────────────────────────────────────────
+    // ── YouTube IFrame API ready ──────────────────────────────────────────────
     function onYouTubeIframeAPIReady() {
       ytAPIReady = true;
       if (pendingQuery) {
@@ -481,94 +455,94 @@
     // ── SEARCH → PLAY ─────────────────────────────────────────────────────────
     function handleQuery(query) {
       if (!query) return;
-      setStatus(`Searching…`, 'searching');
-      if (!ytAPIReady) {
-        // API not loaded yet — queue it
-        pendingQuery = query;
-        return;
-      }
+      setStatus('Searching…', 'searching');
+      if (!ytAPIReady) { pendingQuery = query; return; }
       resolveAndPlay(query);
     }
 
     function resolveAndPlay(query) {
-      // Create a tiny invisible container for the search player
+      // Build a hidden container off-screen
       const ghost = document.createElement('div');
-      ghost.id = 'ghost-player';
-      ghost.style.cssText = 'position:fixed;width:1px;height:1px;opacity:0;pointer-events:none;left:-9999px;top:-9999px;';
+      ghost.style.cssText = 'position:fixed;width:1px;height:1px;opacity:0;pointer-events:none;left:-9999px;top:-9999px;overflow:hidden;';
       document.body.appendChild(ghost);
+
+      const innerDiv = document.createElement('div');
+      ghost.appendChild(innerDiv);
 
       let resolved = false;
 
-      const searchPlayer = new YT.Player(ghost, {
-        width:  '1',
-        height: '1',
+      function cleanup() {
+        try { ghostPlayer.destroy(); } catch(_) {}
+        if (ghost.parentNode) ghost.remove();
+      }
+
+      const ghostPlayer = new YT.Player(innerDiv, {
+        width: 1,
+        height: 1,
         playerVars: {
-          listType:        'search',
-          list:            query + ' song',
-          autoplay:        0,       // don't play the ghost
-          controls:        0,
-          disablekb:       1,
-          fs:              0,
-          modestbranding:  1,
+          listType:       'search',
+          list:           query + ' song official',
+          autoplay:       0,
+          controls:       0,
+          disablekb:      1,
+          fs:             0,
+          modestbranding: 1,
+          origin:         window.location.origin,
         },
         events: {
-          onReady: (e) => {
+          // onStateChange fires -1 (CUED) once YouTube resolves the search
+          // and loads the first video — this is when getVideoData() has real data
+          onStateChange: (e) => {
             if (resolved) return;
-            resolved = true;
-
-            const data    = e.target.getVideoData();
-            const videoId = data.video_id;
-            const title   = data.title || query;
-
-            // Clean up ghost immediately
-            try { searchPlayer.destroy(); } catch(_) {}
-            ghost.remove();
-
-            if (!videoId) {
-              setStatus(`Couldn't find that — try again`, 'error');
-              return;
+            // -1 = VIDEO_CUED  (search resolved, video ready to play)
+            //  5 = VIDEO_CUED in some browsers
+            if (e.data === YT.PlayerState.CUED || e.data === -1 || e.data === 5) {
+              resolved = true;
+              const data    = ghostPlayer.getVideoData();
+              const videoId = data.video_id;
+              const title   = data.title || query;
+              cleanup();
+              if (videoId) {
+                playById(videoId, title);
+              } else {
+                setStatus('Nothing found — try again', 'error');
+              }
             }
-
-            playById(videoId, title);
           },
-          onError: () => {
+          onError: (e) => {
             if (resolved) return;
             resolved = true;
-            try { searchPlayer.destroy(); } catch(_) {}
-            ghost.remove();
-            setStatus(`Couldn't find that — try again`, 'error');
+            cleanup();
+            console.error('Ghost player error:', e.data);
+            setStatus('Nothing found — try again', 'error');
           },
-          // onStateChange fires with CUED (-1) when search result is loaded
-          // but we prefer onReady which is more reliable
         },
       });
 
-      // Safety timeout — if ghost player never responds in 8s, give up
+      // Safety timeout
       setTimeout(() => {
         if (resolved) return;
         resolved = true;
-        try { searchPlayer.destroy(); } catch(_) {}
-        if (ghost.parentNode) ghost.remove();
-        setStatus(`Search timed out — try again`, 'error');
-      }, 8000);
+        cleanup();
+        setStatus('Search timed out — try again', 'error');
+      }, 10000);
     }
 
     // ── PLAY BY VIDEO ID ──────────────────────────────────────────────────────
     function playById(videoId, title) {
       const box = document.getElementById('player-box');
 
-      // Destroy existing main player if any
       if (mainPlayer) {
         try { mainPlayer.destroy(); } catch(_) {}
         mainPlayer = null;
       }
       box.innerHTML = '';
 
-      const playerDiv = document.createElement('div');
-      box.appendChild(playerDiv);
+      const div = document.createElement('div');
+      box.appendChild(div);
       box.classList.add('active');
 
-      mainPlayer = new YT.Player(playerDiv, {
+      mainPlayer = new YT.Player(div, {
         width:  '100%',
         height: '100%',
         videoId,
@@ -576,12 +550,13 @@
           autoplay:       1,
           rel:            0,
           modestbranding: 1,
-          playsinline:    1,   // play inline on iOS (no forced fullscreen)
+          playsinline:    1,
+          origin:         window.location.origin,
         },
         events: {
           onReady: (e) => {
-            e.target.setVolume(100);
             e.target.unMute();
+            e.target.setVolume(100);
             e.target.playVideo();
           },
         },
@@ -593,34 +568,20 @@
     }
 
     // ── FULLSCREEN — entire page ───────────────────────────────────────────────
-    function togglePageFullscreen() {
-      const el  = document.documentElement;
-      const inFS = document.fullscreenElement    || document.webkitFullscreenElement
-                || document.mozFullScreenElement || document.msFullscreenElement;
-      if (!inFS) {
-        (el.requestFullscreen    || el.webkitRequestFullscreen
-         || el.mozRequestFullScreen || el.msRequestFullscreen).call(el);
-      } else {
-        (document.exitFullscreen    || document.webkitExitFullscreen
-         || document.mozCancelFullScreen || document.msExitFullscreen).call(document);
-      }
+    function enterFullscreen() {
+      const el = document.documentElement;
+      (el.requestFullscreen || el.webkitRequestFullscreen
+       || el.mozRequestFullScreen || el.msRequestFullscreen).call(el);
     }
 
     function onFSChange() {
       const inFS = !!(document.fullscreenElement    || document.webkitFullscreenElement
                    || document.mozFullScreenElement || document.msFullscreenElement);
-      document.getElementById('page-fs-icon').innerHTML = inFS ? `
-        <polyline points="4 14 10 14 10 20"/>
-        <polyline points="20 10 14 10 14 4"/>
-        <line x1="10" y1="14" x2="3"  y2="21"/>
-        <line x1="21" y1="3"  x2="14" y2="10"/>` : `
-        <polyline points="15 3 21 3 21 9"/>
-        <polyline points="9 21 3 21 3 15"/>
-        <line x1="21" y1="3"  x2="14" y2="10"/>
-        <line x1="3"  y1="21" x2="10" y2="14"/>`;
+      // Hide the bar when fullscreen, show it when not
+      document.getElementById('fs-bar').classList.toggle('hidden', inFS);
     }
 
-    ['fullscreenchange','webkitfullscreenchange','mozfullscreenchange']
+    ['fullscreenchange','webkitfullscreenchange','mozfullscreenchange','MSFullscreenChange']
       .forEach(ev => document.addEventListener(ev, onFSChange));
 
     // ── UI HELPERS ────────────────────────────────────────────────────────────
