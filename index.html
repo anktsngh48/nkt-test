@@ -39,7 +39,6 @@
       z-index: 0;
     }
 
-    /* ── HEADER ── */
     header {
       position: relative;
       z-index: 10;
@@ -66,7 +65,7 @@
       margin-top: 4px;
     }
 
-    /* ── ACTIVATE OVERLAY ── */
+    /* ACTIVATE OVERLAY */
     #activate-screen {
       position: fixed;
       inset: 0;
@@ -125,7 +124,7 @@
     #tap-btn:hover::before { opacity: 1; }
     #tap-btn span { position: relative; z-index: 1; }
 
-    /* ── MAIN ── */
+    /* MAIN */
     #main {
       position: relative;
       z-index: 1;
@@ -138,13 +137,13 @@
       gap: 24px;
     }
 
-    /* ── VIDEO WRAP ── */
+    /* VIDEO WRAP */
     #video-wrap {
       width: 100%;
       border-radius: 16px;
       overflow: hidden;
       border: 1px solid rgba(0,229,255,0.12);
-      background: var(--card);
+      background: #000;
       aspect-ratio: 16/9;
       position: relative;
       transition: box-shadow 0.4s ease;
@@ -161,7 +160,7 @@
       display: block;
     }
 
-    /* ── FULLSCREEN BUTTON ── */
+    /* FULLSCREEN BUTTON */
     #fs-btn {
       position: absolute;
       bottom: 10px;
@@ -187,7 +186,6 @@
     #fs-btn:hover { background: rgba(0,229,255,0.15); }
     #fs-btn svg { pointer-events: none; }
 
-    /* Fullscreen styles */
     #video-wrap:fullscreen,
     #video-wrap:-webkit-full-screen {
       width: 100vw !important;
@@ -205,11 +203,11 @@
     #video-wrap:fullscreen #fs-btn,
     #video-wrap:-webkit-full-screen #fs-btn { opacity: 1; bottom: 16px; right: 16px; }
 
-    /* ── NOW PLAYING ── */
+    /* NOW PLAYING */
     #now-playing {
       font-size: 0.8rem;
       color: var(--accent);
-      letter-spacing: 0.08em;
+      letter-spacing: 0.05em;
       min-height: 1.2em;
       text-align: center;
       max-width: 100%;
@@ -222,7 +220,7 @@
     }
     #now-playing.visible { opacity: 1; }
 
-    /* ── CONTROLS ── */
+    /* CONTROLS */
     .controls {
       display: flex;
       flex-direction: column;
@@ -268,9 +266,7 @@
       0%   { inset: -4px;  opacity: 0.6; }
       100% { inset: -28px; opacity: 0;   }
     }
-    #mic-btn svg { transition: all 0.3s ease; }
 
-    /* WAVEFORM */
     #waveform {
       display: flex;
       align-items: center;
@@ -348,11 +344,10 @@
   <!-- MAIN -->
   <div id="main">
 
-    <!-- Video panel (hidden until first song) -->
     <div id="video-wrap">
-      <!-- Fullscreen toggle button -->
       <button id="fs-btn" onclick="toggleFullscreen()" title="Fullscreen">
-        <svg id="fs-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <svg id="fs-icon" width="18" height="18" viewBox="0 0 24 24" fill="none"
+             stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
           <polyline points="15 3 21 3 21 9"/>
           <polyline points="9 21 3 21 3 15"/>
           <line x1="21" y1="3" x2="14" y2="10"/>
@@ -388,33 +383,20 @@
 
   <script>
     // ─────────────────────────────────────────────────────────────────────────
-    //  HOW SEARCH WORKS
-    //  1. Fetch YouTube's search results page through a CORS proxy
-    //     (allorigins.win or corsproxy.io — tried in order)
-    //  2. Pull video IDs + titles out of the raw HTML using regex
-    //     (YouTube embeds its data as JSON inside every results page)
-    //  3. Play the first result in an Invidious embed (ad-free player)
+    //  SEARCH  : CORS proxy → fetch YouTube search HTML → regex out videoId+title
+    //  PLAYBACK: youtube-nocookie.com/embed  (no ads, no tracking, always works)
     // ─────────────────────────────────────────────────────────────────────────
 
-    const CORS_PROXIES = [
+    // Three independent CORS proxies, tried in order
+    const PROXIES = [
       q => `https://api.allorigins.win/get?url=${encodeURIComponent(q)}`,
       q => `https://corsproxy.io/?${encodeURIComponent(q)}`,
       q => `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(q)}`,
     ];
 
-    // Invidious instances for the embed player (ad-free)
-    const INVIDIOUS_HOSTS = [
-      'https://invidious.lunar.icu',
-      'https://yewtu.be',
-      'https://inv.nadeko.net',
-      'https://invidious.privacydev.net',
-    ];
-
-    let sessionActive  = false;
-    let recognition    = null;
-    let isListening    = false;
-    let embedHost      = INVIDIOUS_HOSTS[0];
-    let isFullscreen   = false;
+    let sessionActive = false;
+    let recognition   = null;
+    let isListening   = false;
 
     // ── SESSION ──────────────────────────────────────────────────────────────
     function activateSession() {
@@ -422,17 +404,6 @@
       const s = document.getElementById('activate-screen');
       s.classList.add('hidden');
       setTimeout(() => s.style.display = 'none', 500);
-      pickEmbedHost();
-    }
-
-    // Silently find the fastest responding Invidious host for embeds
-    async function pickEmbedHost() {
-      for (const host of INVIDIOUS_HOSTS) {
-        try {
-          const r = await fetchWithTimeout(`${host}/api/v1/stats`, 4000);
-          if (r.ok) { embedHost = host; return; }
-        } catch (_) {}
-      }
     }
 
     // ── SPEECH RECOGNITION ───────────────────────────────────────────────────
@@ -500,138 +471,155 @@
     }
 
     async function searchYouTube(query) {
-      const ytSearchUrl = `https://www.youtube.com/results?search_query=${encodeURIComponent(query + ' song')}`;
+      // Search YouTube directly; the HTML page contains JSON with all result data
+      const ytUrl = `https://www.youtube.com/results?search_query=${encodeURIComponent(query + ' official audio')}`;
 
-      for (let i = 0; i < CORS_PROXIES.length; i++) {
+      for (let i = 0; i < PROXIES.length; i++) {
         try {
-          const proxyUrl = CORS_PROXIES[i](ytSearchUrl);
-          const res = await fetchWithTimeout(proxyUrl, 10000);
-          if (!res.ok) { console.warn('Proxy', i, 'returned', res.status); continue; }
+          const res = await fetchWithTimeout(PROXIES[i](ytUrl), 12000);
+          if (!res.ok) { console.warn('Proxy', i, 'HTTP', res.status); continue; }
 
-          // allorigins wraps in JSON: { contents: "<html>..." }
-          // corsproxy and codetabs return raw HTML
+          // allorigins returns JSON wrapper; others return raw HTML
           let html;
           const ct = res.headers.get('content-type') || '';
           if (ct.includes('application/json')) {
-            const json = await res.json();
-            html = json.contents || json.body || '';
+            const j = await res.json();
+            html = j.contents || j.body || '';
           } else {
             html = await res.text();
           }
 
-          const result = parseVideoFromHTML(html);
-          if (result) return result;
-          console.warn('Proxy', i, 'returned no parseable video');
+          const result = extractFirstVideo(html);
+          if (result) {
+            console.log('Found via proxy', i, ':', result.title, result.videoId);
+            return result;
+          }
+          console.warn('Proxy', i, ': HTML received but no video found');
         } catch (e) {
-          console.warn('Proxy', i, 'failed:', e.message);
+          console.warn('Proxy', i, 'error:', e.message);
         }
       }
-      throw new Error('All search proxies failed');
+      throw new Error('All proxies exhausted');
     }
 
-    function parseVideoFromHTML(html) {
-      if (!html || html.length < 100) return null;
+    function extractFirstVideo(html) {
+      if (!html || html.length < 500) return null;
 
-      // YouTube bakes its data into the page as JSON (ytInitialData).
-      // The fastest way to extract video IDs is a simple regex — no JSON parsing needed.
+      // YouTube embeds a JS variable: var ytInitialData = {...};
+      // We pull videoId + title pairs out of it with a targeted regex.
+      // Pattern matches: "videoId":"XXXXXXXXXXX"  anywhere in the page data.
 
-      // Strategy 1: find videoId directly adjacent to a title (most reliable structure)
-      // Looks for: "videoId":"XXXXXXXXXXX","thumbnail":... or similar tight groupings
-      const videoIdMatches = [...html.matchAll(/"videoId":"([a-zA-Z0-9_-]{11})"/g)];
-      if (!videoIdMatches.length) return null;
+      // Collect all videoId occurrences
+      const idMatches = [...html.matchAll(/"videoId":"([a-zA-Z0-9_-]{11})"/g)];
+      if (!idMatches.length) return null;
 
-      // Skip videoIds that appear only in "currently playing" or ads sections
-      // The first match in search results HTML is almost always the top result
-      const videoId = videoIdMatches[0][1];
+      // The first videoId in ytInitialData is the top search result.
+      // Skip any that appear before ytInitialData (e.g. in inline scripts/ads).
+      const dataStart = html.indexOf('ytInitialData');
+      const candidates = dataStart > -1
+        ? idMatches.filter(m => m.index > dataStart)
+        : idMatches;
 
-      // Extract title: look for a "text" field near the videoId position
+      const match = candidates[0] || idMatches[0];
+      const videoId = match[1];
+
+      // Extract title: scan a window of text around the videoId match for a title field.
+      // YouTube structure near a result: ..."videoId":"ID"...,"title":{"runs":[{"text":"TITLE"}
+      // We search backwards from the match index to find the nearest title.
+      const searchStart = Math.max(0, match.index - 3000);
+      const searchEnd   = Math.min(html.length, match.index + 1000);
+      const chunk       = html.substring(searchStart, searchEnd);
+
       let title = '';
-      const pos = videoIdMatches[0].index;
-      // Search a window of text around the first videoId for a title-like string
-      const window = html.substring(Math.max(0, pos - 2000), pos + 500);
-      const titleMatch = window.match(/"title":\{"runs":\[\{"text":"([^"]{3,100})"\}/);
-      if (titleMatch) {
-        title = titleMatch[1];
-      } else {
-        // Fallback: any quoted text that looks like a song title near the videoId
-        const fallback = window.match(/"text":"([^"]{5,80})"/);
-        title = fallback ? fallback[1] : videoId;
+
+      // Try structured title pattern first
+      const t1 = chunk.match(/"title":\{"runs":\[\{"text":"((?:[^"\\]|\\.)*)"\}/);
+      if (t1) title = t1[1];
+
+      // Fallback: simpleText pattern
+      if (!title) {
+        const t2 = chunk.match(/"title":\{"simpleText":"((?:[^"\\]|\\.)*)"\}/);
+        if (t2) title = t2[1];
       }
 
-      // Decode HTML entities in title
-      title = title.replace(/\\u0026/g, '&').replace(/\\"/g, '"').replace(/\\\//g, '/');
+      // Last resort: any reasonable quoted string near the ID
+      if (!title) {
+        const t3 = chunk.match(/"text":"([^"]{8,100})"/);
+        if (t3) title = t3[1];
+      }
+
+      if (!title) title = 'Now Playing';
+
+      // Unescape common sequences
+      title = title
+        .replace(/\\u0026/g, '&')
+        .replace(/\\u003c/g, '<')
+        .replace(/\\u003e/g, '>')
+        .replace(/\\"/g, '"')
+        .replace(/\\\//g, '/');
 
       return { videoId, title };
     }
 
     // ── PLAY VIDEO ───────────────────────────────────────────────────────────
+    // youtube-nocookie.com = YouTube's own privacy-enhanced embed
+    // — no cookies, no personalised ads, completely reliable
     function playVideo(videoId, title) {
       const wrap = document.getElementById('video-wrap');
       const old  = wrap.querySelector('iframe');
       if (old) old.remove();
 
-      // Invidious embed = ad-free, autoplay=1
-      const iframe       = document.createElement('iframe');
-      iframe.src         = `${embedHost}/embed/${videoId}?autoplay=1&listen=0&quality=hd720`;
-      iframe.allow       = 'autoplay; fullscreen; picture-in-picture';
+      const iframe           = document.createElement('iframe');
+      iframe.src             = `https://www.youtube-nocookie.com/embed/${videoId}?autoplay=1&rel=0&modestbranding=1`;
+      iframe.allow           = 'autoplay; fullscreen; picture-in-picture';
       iframe.allowFullscreen = true;
-      iframe.title       = title || 'Video';
+      iframe.title           = title;
 
-      // Insert before the fullscreen button so button stays on top
+      // Insert before the FS button so the button stays on top
       wrap.insertBefore(iframe, document.getElementById('fs-btn'));
       wrap.classList.add('active');
 
       setStatus('Now playing', 'playing');
-      showNowPlaying(title || videoId);
+      showNowPlaying(title);
       showTranscript('', false);
     }
 
     // ── FULLSCREEN ────────────────────────────────────────────────────────────
     function toggleFullscreen() {
       const wrap = document.getElementById('video-wrap');
-
       const inFS = document.fullscreenElement || document.webkitFullscreenElement
                 || document.mozFullScreenElement || document.msFullscreenElement;
-
       if (!inFS) {
-        const req = wrap.requestFullscreen || wrap.webkitRequestFullscreen
-                  || wrap.mozRequestFullScreen || wrap.msRequestFullscreen;
-        if (req) req.call(wrap);
+        (wrap.requestFullscreen || wrap.webkitRequestFullscreen
+         || wrap.mozRequestFullScreen || wrap.msRequestFullscreen).call(wrap);
       } else {
-        const exit = document.exitFullscreen || document.webkitExitFullscreen
-                   || document.mozCancelFullScreen || document.msExitFullscreen;
-        if (exit) exit.call(document);
+        (document.exitFullscreen || document.webkitExitFullscreen
+         || document.mozCancelFullScreen || document.msExitFullscreen).call(document);
       }
     }
 
-    // Update icon when fullscreen state changes
-    function onFullscreenChange() {
+    function onFSChange() {
       const inFS = !!(document.fullscreenElement || document.webkitFullscreenElement
                    || document.mozFullScreenElement || document.msFullscreenElement);
-      const icon = document.getElementById('fs-icon');
-      if (inFS) {
-        icon.innerHTML = `
-          <polyline points="4 14 10 14 10 20"/>
-          <polyline points="20 10 14 10 14 4"/>
-          <line x1="10" y1="14" x2="3" y2="21"/>
-          <line x1="21" y1="3" x2="14" y2="10"/>`;
-      } else {
-        icon.innerHTML = `
-          <polyline points="15 3 21 3 21 9"/>
-          <polyline points="9 21 3 21 3 15"/>
-          <line x1="21" y1="3" x2="14" y2="10"/>
-          <line x1="3" y1="21" x2="10" y2="14"/>`;
-      }
+      document.getElementById('fs-icon').innerHTML = inFS ? `
+        <polyline points="4 14 10 14 10 20"/>
+        <polyline points="20 10 14 10 14 4"/>
+        <line x1="10" y1="14" x2="3" y2="21"/>
+        <line x1="21" y1="3" x2="14" y2="10"/>` : `
+        <polyline points="15 3 21 3 21 9"/>
+        <polyline points="9 21 3 21 3 15"/>
+        <line x1="21" y1="3" x2="14" y2="10"/>
+        <line x1="3" y1="21" x2="10" y2="14"/>`;
     }
 
-    document.addEventListener('fullscreenchange',       onFullscreenChange);
-    document.addEventListener('webkitfullscreenchange', onFullscreenChange);
-    document.addEventListener('mozfullscreenchange',    onFullscreenChange);
+    ['fullscreenchange','webkitfullscreenchange','mozfullscreenchange']
+      .forEach(e => document.addEventListener(e, onFSChange));
 
-    // Mobile: tap on video to show/hide fullscreen button
+    // Mobile: tap video area to reveal the fullscreen button briefly
     document.getElementById('video-wrap').addEventListener('touchstart', function() {
-      this.classList.toggle('touch-show');
-      setTimeout(() => this.classList.remove('touch-show'), 3000);
+      this.classList.add('touch-show');
+      clearTimeout(this._touchTimer);
+      this._touchTimer = setTimeout(() => this.classList.remove('touch-show'), 3000);
     }, { passive: true });
 
     // ── HELPERS ──────────────────────────────────────────────────────────────
@@ -639,8 +627,8 @@
       const ctrl = new AbortController();
       const id   = setTimeout(() => ctrl.abort(), ms);
       return fetch(url, { signal: ctrl.signal })
-        .then(r   => { clearTimeout(id); return r;   })
-        .catch(e  => { clearTimeout(id); throw e;    });
+        .then(r  => { clearTimeout(id); return r;  })
+        .catch(e => { clearTimeout(id); throw e;   });
     }
 
     function setMicState(on) {
@@ -682,7 +670,6 @@
       el.classList.add('visible');
     }
 
-    // Spacebar shortcut
     document.addEventListener('keydown', (e) => {
       if (e.code === 'Space' && e.target.tagName !== 'BUTTON') {
         e.preventDefault();
