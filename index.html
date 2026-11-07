@@ -4,6 +4,10 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>NKT JustSay</title>
+  <link rel="preconnect" href="https://www.youtube.com" />
+  <link rel="preconnect" href="https://i.ytimg.com" />
+  <link rel="preconnect" href="https://api.piped.private.coffee" crossorigin />
+  <link rel="preconnect" href="https://pipedapi.ducks.party" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Sora:wght@300;400;500&display=swap" rel="stylesheet" />
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -283,29 +287,29 @@
   // ───────────────────────────────────────────────────────────────────────────
   //  SEARCH  : No API key. Races several free sources in parallel and uses
   //            whichever answers first:
-  //              • Piped API servers (live list from piped-instances.kavin.rocks,
-  //                with a built-in backup list)
+  //              • Piped API servers
   //              • YouTube results page through public CORS proxies
+  //  SPEED   : the player is loaded in the background as soon as you tap
+  //            "LET ME IN", then reused for every song; repeat searches are cached
   //  PLAYBACK: YouTube IFrame Player API — auto-skips videos whose owner has
   //            blocked embedding (very common for official music videos)
   // ───────────────────────────────────────────────────────────────────────────
 
-  const PIPED_BACKUP = [
+  // Free Piped search servers. Checked 7 Nov 2026 from India: the first two
+  // answered in ~1.5–2 s; the rest were down that day but are kept in case they return.
+  const PIPED_SERVERS = [
+    'https://api.piped.private.coffee',
+    'https://pipedapi.ducks.party',
     'https://pipedapi.kavin.rocks',
     'https://pipedapi.leptons.xyz',
-    'https://pipedapi.nosebs.ru',
-    'https://pipedapi-libre.kavin.rocks',
-    'https://api.piped.private.coffee',
     'https://pipedapi.adminforge.de',
-    'https://pipedapi.ducks.party',
     'https://pipedapi.reallyaweso.me',
+    'https://pipedapi.nosebs.ru',
   ];
-  const MAX_PIPED = 6;
 
   const PROXIES = [
     u => 'https://api.allorigins.win/raw?url=' + encodeURIComponent(u),
     u => 'https://api.codetabs.com/v1/proxy?quest=' + encodeURIComponent(u),
-    u => 'https://corsproxy.io/?url=' + encodeURIComponent(u),
   ];
 
   let sessionActive = false;
@@ -322,8 +326,7 @@
     const s = document.getElementById('activate-screen');
     s.classList.add('hidden');
     setTimeout(() => s.style.display = 'none', 500);
-    loadYTApi();          // start loading the player early
-    getPipedInstances();  // and the live list of search servers
+    ensurePlayer().catch(() => {});  // load the player while the user is still speaking
   }
 
   // ── SPEECH ─────────────────────────────────────────────────────────────────
@@ -335,11 +338,17 @@
 
     r.onstart = () => { isListening = true; setMicState(true); setStatus('Listening…', 'listening'); };
 
+    // Chrome waits for 1–2 s of silence before it finalises. If the words
+    // haven't changed for 0.9 s, stop listening — that delivers the final result at once.
+    let settleTimer = null;
     r.onresult = (e) => {
       const txt = Array.from(e.results).map(x => x[0].transcript).join('');
       document.getElementById('query-input').value = txt;
+      clearTimeout(settleTimer);
       if (e.results[e.results.length - 1].isFinal) {
         doSearch();
+      } else {
+        settleTimer = setTimeout(() => { try { r.stop(); } catch(_) {} }, 900);
       }
     };
 
@@ -348,7 +357,10 @@
       const msgs = { 'no-speech': 'No speech — try again', 'not-allowed': 'Mic blocked — allow in browser settings', 'network': 'Network error' };
       setStatus(msgs[e.error] || 'Mic error: ' + e.error, 'error');
     };
-    r.onend = () => { isListening = false; setMicState(false); };
+    r.onend = () => {
+      isListening = false; setMicState(false); clearTimeout(settleTimer);
+      if (document.getElementById('query-input').value.trim()) doSearch();  // no-op if already searched
+    };
     return r;
   }
 
@@ -371,7 +383,9 @@
     clearResults();
 
     try {
-      const results = await searchAll(q);
+      const key = q.toLowerCase();
+      const results = searchCache.get(key) || await searchAll(q);
+      searchCache.set(key, results);
       if (mySeq !== searchSeq) return;               // a newer search has started
       if (!results.length) { lastQuery = ''; setStatus('No results found — try again', 'error'); return; }
       currentList = results;
@@ -385,14 +399,12 @@
     }
   }
 
+  const searchCache = new Map();
+
   // Race every source at once — first one that returns videos wins
   async function searchAll(q) {
-    const piped = await Promise.race([
-      getPipedInstances(),
-      new Promise(r => setTimeout(() => r(PIPED_BACKUP.slice(0, MAX_PIPED)), 1500)),
-    ]);
     const attempts = [
-      ...piped.map(api => searchPiped(api, q)),
+      ...PIPED_SERVERS.map(api => searchPiped(api, q)),
       searchViaProxies(q),
     ];
     try {
@@ -402,28 +414,8 @@
     }
   }
 
-  // Live list of Piped API servers (the Piped docs ask clients to read it dynamically)
-  let pipedPromise = null;
-  function getPipedInstances() {
-    if (pipedPromise) return pipedPromise;
-    pipedPromise = (async () => {
-      try {
-        const res = await fetchWithTimeout('https://piped-instances.kavin.rocks/', 6000);
-        const arr = await res.json();
-        const live = arr
-          .filter(i => i && i.api_url && i.up_to_date !== false)
-          .map(i => i.api_url.replace(/\/+$/, ''));
-        const merged = [...new Set([...live, ...PIPED_BACKUP])];
-        return merged.slice(0, MAX_PIPED);
-      } catch(e) {
-        return PIPED_BACKUP.slice(0, MAX_PIPED);
-      }
-    })();
-    return pipedPromise;
-  }
-
   async function searchPiped(api, q) {
-    const res = await fetchWithTimeout(api + '/search?q=' + encodeURIComponent(q) + '&filter=videos', 10000);
+    const res = await fetchWithTimeout(api + '/search?q=' + encodeURIComponent(q) + '&filter=videos', 8000);
     if (!res.ok) throw new Error('Piped HTTP ' + res.status);
     const j = await res.json();
     const vids = (j.items || [])
@@ -547,6 +539,7 @@
   // ── PLAYER (YouTube IFrame API) ────────────────────────────────────────────
   let ytApiPromise = null;
   let player = null;
+  let playerPromise = null;
 
   function loadYTApi() {
     if (ytApiPromise) return ytApiPromise;
@@ -562,6 +555,29 @@
     return ytApiPromise;
   }
 
+  // Create the player once (even while the box is hidden) and reuse it.
+  // Cold start was ~5.8 s; pre-loaded, the first song starts in ~2 s, later ones ~1.3 s.
+  function ensurePlayer() {
+    if (playerPromise) return playerPromise;
+    playerPromise = loadYTApi().then(() => new Promise((resolve, reject) => {
+      const box = document.getElementById('player-box');
+      box.innerHTML = '<div id="yt-player"></div>';
+      const vars = { autoplay: 1, rel: 0, playsinline: 1 };
+      if (location.protocol.startsWith('http')) vars.origin = location.origin;
+      const timer = setTimeout(() => reject(new Error('YouTube player did not load — check connection')), 15000);
+      player = new YT.Player('yt-player', {
+        width: '100%', height: '100%',
+        playerVars: vars,
+        events: {
+          onReady: () => { clearTimeout(timer); resolve(player); },
+          onError: onPlayerError,
+          onStateChange: e => { if (e.data === YT.PlayerState.PLAYING) setStatus('Now playing', 'playing'); },
+        },
+      });
+    })).catch(e => { playerPromise = null; player = null; throw e; });
+    return playerPromise;
+  }
+
   async function playIndex(idx) {
     const r = currentList[idx];
     if (!r) { setStatus('None of these can be embedded — try another search', 'error'); return; }
@@ -575,30 +591,13 @@
     box.classList.add('active');
     box.scrollIntoView({ behavior: 'smooth', block: 'start' });
 
-    try { await loadYTApi(); }
-    catch(e) { setStatus(e.message, 'error'); return; }
-
-    if (player && player.loadVideoById) {
-      player.loadVideoById(r.videoId);         // reuse player → keeps autoplay permission
-    } else {
-      box.innerHTML = '<div id="yt-player"></div>';
-      const vars = { autoplay: 1, rel: 0, playsinline: 1 };
-      if (location.protocol.startsWith('http')) vars.origin = location.origin;
-      player = new YT.Player('yt-player', {
-        width: '100%', height: '100%',
-        videoId: r.videoId,
-        playerVars: vars,
-        events: {
-          onReady: e => { e.target.playVideo(); },
-          onError: onPlayerError,
-          onStateChange: e => { if (e.data === YT.PlayerState.PLAYING) setStatus('Now playing', 'playing'); },
-        },
-      });
-      const f = player.getIframe && player.getIframe();
-      if (f) f.setAttribute('referrerpolicy', 'strict-origin-when-cross-origin');
-    }
-
     setStatus('Loading…', 'playing');
+    let p;
+    try { p = await ensurePlayer(); }
+    catch(e) { setStatus(e.message, 'error'); return; }
+    if (currentIdx !== idx) return;            // user picked something else meanwhile
+    p.loadVideoById(r.videoId);
+
     const np = document.getElementById('now-playing');
     np.textContent = '▶ ' + r.title;
     np.classList.add('visible');
