@@ -104,7 +104,7 @@
       display: flex; flex-direction: column; align-items: center; gap: 20px;
     }
 
-    /* ── AUDIO PLAYER CARD ── */
+    /* ── PLAYER CARD (mini / video) ── */
     #np-card {
       width: 100%; display: none; align-items: center; gap: 20px;
       background: var(--card); border: 1px solid var(--border); border-radius: 16px; padding: 16px;
@@ -120,6 +120,21 @@
 
     .np-info { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 10px; }
     .np-label { font-family: 'Orbitron', sans-serif; font-size: 0.6rem; letter-spacing: 0.22em; color: var(--accent); }
+    .np-top { display: flex; align-items: center; justify-content: space-between; gap: 10px; width: 100%; }
+
+    /* Mini / Video switch */
+    .mode-switch { display: inline-flex; border: 1px solid var(--border); border-radius: 20px; padding: 2px; flex-shrink: 0; }
+    .mode-switch button {
+      background: transparent; border: none; cursor: pointer; color: var(--muted);
+      font-family: 'Orbitron', sans-serif; font-size: 0.56rem; font-weight: 700; letter-spacing: 0.15em;
+      padding: 6px 11px; border-radius: 16px; transition: all 0.2s;
+    }
+    .mode-switch button:hover { color: var(--text); }
+    .mode-switch button.active { background: rgba(0,229,255,0.12); color: var(--accent); }
+
+    /* Video mode: full-width 16:9 player, details underneath */
+    #np-card.video.active { flex-direction: column; align-items: stretch; }
+    #np-card.video #player-box { width: 100%; height: auto; aspect-ratio: 16 / 9; }
     #np-title {
       font-size: 0.98rem; font-weight: 500; line-height: 1.35; color: var(--text);
       display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
@@ -269,11 +284,17 @@
   <!-- MAIN -->
   <div id="main">
 
-    <!-- Audio player card -->
+    <!-- Player card (mini / video) -->
     <div id="np-card">
       <div id="player-box"></div>
       <div class="np-info">
-        <div class="np-label">NOW PLAYING</div>
+        <div class="np-top">
+          <div class="np-label">NOW PLAYING</div>
+          <div class="mode-switch" role="group" aria-label="Player size">
+            <button id="mode-mini" onclick="setMode('mini')" title="Small player">▫ MINI</button>
+            <button id="mode-video" onclick="setMode('video')" title="Full-size player">▶ VIDEO</button>
+          </div>
+        </div>
         <div id="np-title"></div>
         <div id="np-channel"></div>
         <div class="np-progress">
@@ -338,7 +359,8 @@
   //              • YouTube results page through public CORS proxies
   //  SPEED   : the player is loaded in the background as soon as you tap
   //            "LET ME IN", then reused for every song; repeat searches are cached
-  //  PLAYBACK: audio-player card around a small YouTube IFrame player (YouTube
+  //  PLAYBACK: player card with a Mini (small square) / Video (full 16:9) switch
+  //            around one YouTube IFrame player (YouTube
   //            requires it to stay visible, min 200×200). Custom play/pause,
   //            prev/next, seek; plays the next result when a song ends.
   //            Auto-skips videos whose owner has blocked embedding.
@@ -662,10 +684,22 @@
     }, 4000);
   }
 
-  // ── AUDIO CONTROLS ─────────────────────────────────────────────────────────
+  // ── PLAYER CONTROLS ─────────────────────────────────────────────────────────
   const ICON_PLAY  = '<svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5.6v12.8a.9.9 0 0 0 1.4.8l10-6.4a.9.9 0 0 0 0-1.6l-10-6.4A.9.9 0 0 0 8 5.6z"/></svg>';
   const ICON_PAUSE = '<svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="5" width="4" height="14" rx="1.2"/><rect x="14" y="5" width="4" height="14" rx="1.2"/></svg>';
   document.getElementById('play-btn').innerHTML = ICON_PLAY;
+
+  // Mini / Video switch — layout only, so playback carries on; choice is remembered
+  function setMode(m) {
+    const video = m === 'video';
+    document.getElementById('np-card').classList.toggle('video', video);
+    document.getElementById('mode-mini').classList.toggle('active', !video);
+    document.getElementById('mode-video').classList.toggle('active', video);
+    try { localStorage.setItem('justsay-mode', video ? 'video' : 'mini'); } catch(_) {}
+  }
+  let savedMode = 'mini';
+  try { savedMode = localStorage.getItem('justsay-mode') || 'mini'; } catch(_) {}
+  setMode(savedMode);
 
   function onPlayerState(e) {
     const S = YT.PlayerState;
